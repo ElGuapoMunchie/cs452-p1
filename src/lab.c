@@ -1,7 +1,6 @@
 #include <string.h>
-#include "harness/unity.h"
+#include "../tests/harness/unity.h"
 #include "../src/lab.h"
-
 
 void setUp(void) {
   // set stuff up here
@@ -10,7 +9,6 @@ void setUp(void) {
 void tearDown(void) {
   // clean stuff up here
 }
-
 
 void test_cmd_parse2(void)
 {
