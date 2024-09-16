@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include "../src/lab.h"
 
 int main(int argc, char **argv)
 {
@@ -12,8 +15,9 @@ int main(int argc, char **argv)
     while ((c = getopt (argc, argv, "abc:")) != -1)
     switch (c)
       {
-      case 'a':
-        printf("get a here");
+      // Print version
+      case 'v':
+        printf("OS Version: %c.%c", lab_VERSION_MAJOR, lab_VERSION_MINOR);
         break;
       case 'b':
         printf("get b here");
@@ -22,10 +26,10 @@ int main(int argc, char **argv)
         printf("get c here");
         break;
       case '?':
-        if (isprint(optout))
-          fprintf(stderr, "Unknown option", optout);
+        if (isprint(c))
+          fprintf(stderr, "Unknown option %c", c);
         else
-          fprintf(stderr, " Unknown option", optout);
+          fprintf(stderr, " Unknown option %c", c);
         return 1;
       default:
         abort();
