@@ -7,17 +7,17 @@
 #include "../src/lab.h"
 
 int main(int argc, char **argv)
-{
-  printf("hello world\n");
-  
+{  
+  printf("%c", **argv);
+
   int c;
 
-    while ((c = getopt (argc, argv, "abc:")) != -1)
+    while ((c = getopt (argc, argv, "v")) != -1)
     switch (c)
       {
       // Print version
       case 'v':
-        printf("OS Version: %c.%c", lab_VERSION_MAJOR, lab_VERSION_MINOR);
+        printf("OS Version: %d.%d\n", lab_VERSION_MAJOR, lab_VERSION_MINOR);
         break;
       case 'b':
         printf("get b here");
@@ -26,10 +26,14 @@ int main(int argc, char **argv)
         printf("get c here");
         break;
       case '?':
-        if (isprint(c))
-          fprintf(stderr, "Unknown option %c", c);
+        if (optopt == 'c')
+          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
         else
-          fprintf(stderr, " Unknown option %c", c);
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n",
+                   optopt);
         return 1;
       default:
         abort();

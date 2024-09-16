@@ -1,14 +1,16 @@
-// #include <string.h>
-// #include "../tests/harness/unity.h"
-// #include "../src/lab.h"
+#include <string.h>
+#include "harness/unity.h"
+#include "../src/lab.h"
 
-// void setUp(void) {
-//   // set stuff up here
-// }
 
-// void tearDown(void) {
-//   // clean stuff up here
-// }
+void setUp(void) {
+  // set stuff up here
+}
+
+void tearDown(void) {
+  // clean stuff up here
+}
+
 
 // void test_cmd_parse2(void)
 // {
@@ -157,8 +159,9 @@
 //      cmd_free(cmd);
 // }
 
-// int main(void) {
-//   UNITY_BEGIN();
+int main(void) {
+  UNITY_BEGIN();
+
 //   RUN_TEST(test_cmd_parse);
 //   RUN_TEST(test_cmd_parse2);
 //   RUN_TEST(test_trim_white_no_whitespace);
@@ -172,5 +175,5 @@
 //   RUN_TEST(test_ch_dir_home);
 //   RUN_TEST(test_ch_dir_root);
 
-//   return UNITY_END();
-// }
+  return UNITY_END();
+}

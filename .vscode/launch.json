@@ -34,7 +34,7 @@
             "name": "Debug Exe",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/myprogram -v",
+            "program": "${workspaceRoot}/myprogram",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
