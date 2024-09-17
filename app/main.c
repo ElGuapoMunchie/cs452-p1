@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
 
   /* Read and process command line arguments */
-  printf("%c", **argv);
+  // printf("%c", **argv);
 
   int c;
 
@@ -42,7 +42,18 @@ int main(int argc, char **argv)
       break;
     }
 
-  
+  /* Implement Custom Prompt Here */
+  const char *MY_PROMPT = getenv("PATH");
+
+  if (MY_PROMPT != NULL)
+  {
+    printf("PATH: %s\n", MY_PROMPT);
+  }
+  else
+  {
+    printf("PATH not found\n");
+  }
+
   /* Now begin user process to handle user input */
   char *line;
   using_history();
@@ -50,6 +61,11 @@ int main(int argc, char **argv)
   {
     printf("%s\n", line);
     add_history(line);
+    if (strcmp(line, "exit") == 0)
+    { // TODO: REMOVE Temporary Exit FROM MYPROG
+      free(line);
+      break;
+    }
     free(line);
   }
 

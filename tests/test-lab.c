@@ -112,12 +112,12 @@ void tearDown(void) {
 //      free(line);
 // }
 
-// void test_get_prompt_default(void)
-// {
-//      char *prompt = get_prompt("MY_PROMPT");
-//      TEST_ASSERT_EQUAL_STRING(prompt, "shell>");
-//      free(prompt);
-// }
+void test_get_prompt_default(void)
+{
+     char *prompt = get_prompt("MY_PROMPT");
+     TEST_ASSERT_EQUAL_STRING(prompt, "shell>");
+     free(prompt);
+}
 
 // void test_get_prompt_custom(void)
 // {
