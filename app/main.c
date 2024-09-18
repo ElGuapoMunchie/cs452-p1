@@ -8,10 +8,7 @@
 
 int main(int argc, char **argv)
 {
-
-  /* Read and process command line arguments */
-  // printf("%c", **argv);
-
+  char *prompt;
   int c;
 
   while ((c = getopt(argc, argv, "v")) != -1)
@@ -43,16 +40,7 @@ int main(int argc, char **argv)
     }
 
   /* Implement Custom Prompt Here */
-  const char *MY_PROMPT = getenv("PATH");
-
-  if (MY_PROMPT != NULL)
-  {
-    printf("PATH: %s\n", MY_PROMPT);
-  }
-  else
-  {
-    printf("PATH not found\n");
-  }
+  prompt = get_prompt("MY_PROMPT");
 
   /* Now begin user process to handle user input */
   char *line;
@@ -69,5 +57,8 @@ int main(int argc, char **argv)
     free(line);
   }
 
+  /* Free All Items and Data */
+  free(prompt); 
+  
   return 0;
 }

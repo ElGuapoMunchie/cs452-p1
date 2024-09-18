@@ -119,18 +119,18 @@ void test_get_prompt_default(void)
      free(prompt);
 }
 
-// void test_get_prompt_custom(void)
-// {
-//      const char* prmpt = "MY_PROMPT";
-//      if(setenv(prmpt,"foo>",true)){
-//           TEST_FAIL();
-//      }
+void test_get_prompt_custom(void)
+{
+     const char* prmpt = "MY_PROMPT";
+     if(setenv(prmpt,"foo>",true)){
+          TEST_FAIL();
+     }
 
-//      char *prompt = get_prompt(prmpt);
-//      TEST_ASSERT_EQUAL_STRING(prompt, "foo>");
-//      free(prompt);
-//      unsetenv(prmpt);
-// }
+     char *prompt = get_prompt(prmpt);
+     TEST_ASSERT_EQUAL_STRING(prompt, "foo>");
+     free(prompt);
+     unsetenv(prmpt);
+}
 
 // void test_ch_dir_home(void)
 // {
@@ -170,8 +170,8 @@ int main(void) {
 //   RUN_TEST(test_trim_white_both_whitespace_single);
 //   RUN_TEST(test_trim_white_both_whitespace_double);
 //   RUN_TEST(test_trim_white_all_whitespace);
-//   RUN_TEST(test_get_prompt_default);
-//   RUN_TEST(test_get_prompt_custom);
+  RUN_TEST(test_get_prompt_default);
+  RUN_TEST(test_get_prompt_custom);
 //   RUN_TEST(test_ch_dir_home);
 //   RUN_TEST(test_ch_dir_root);
 
