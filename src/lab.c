@@ -8,7 +8,6 @@ char *get_prompt(const char *env)
 {
     if (getenv(env) != NULL)
     {
-        printf("Env not null");
         char *retEnv = (char *)malloc(sizeof(char) * MAX_LENGTH);
         retEnv = strcpy(retEnv, getenv(env));
         return retEnv;
@@ -16,7 +15,6 @@ char *get_prompt(const char *env)
     }
     else
     { // Env must be NULL
-        printf("Env NULL");
         char *pmt = (char *)malloc(sizeof(char) * MAX_LENGTH);
         pmt[0] = 's';
         pmt[1] = 'h';

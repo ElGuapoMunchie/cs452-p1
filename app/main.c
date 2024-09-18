@@ -44,12 +44,13 @@ int main(int argc, char **argv)
 
   /* Now begin user process to handle user input */
   char *line;
+  // char *lineCompare = "";
   using_history();
   while ((line = readline("$")))
   {
     printf("%s\n", line);
     add_history(line);
-    if (strcmp(line, "exit") == 0)
+    if (strcmp(line, "exit") == 0 || line == NULL)
     { // TODO: REMOVE Temporary Exit FROM MYPROG
       free(line);
       break;
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
   }
 
   /* Free All Items and Data */
-  free(prompt); 
-  
+  free(prompt);
+
   return 0;
 }
