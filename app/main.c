@@ -9,6 +9,10 @@
 int main(int argc, char **argv)
 {
   char *prompt;
+  char *home;
+  char **homePtr;
+  int success;
+
   int c;
 
   while ((c = getopt(argc, argv, "v")) != -1)
@@ -50,10 +54,27 @@ int main(int argc, char **argv)
   {
     printf("%s\n", line);
     add_history(line);
-    if (strcmp(line, "exit") == 0 || line == NULL)
-    { // TODO: REMOVE Temporary Exit FROM MYPROG
+    if (strcmp(line, "exit") == 0 || line == NULL) // EXIT
+    {
       free(line);
       break;
+    }
+    if (strncmp(line, "cd", 2) == 0)
+    { // 'cd' CHANGE DIRECTORY
+
+      /* Case1: User enters nothing -> GOTO home directory*/
+      if (strcmp(line, "cd") == 0) // Litterally just "cd"
+      {
+        home = getenv("HOME");
+        homePtr = &home;
+        success = change_dir(homePtr);
+
+        if (success == -1){ // ERROR ENCOUNTERED
+          exit(1);
+        }
+      }
+
+      /* Case2: Change directory --> match directory name, goto directory || print error */
     }
     free(line);
   }

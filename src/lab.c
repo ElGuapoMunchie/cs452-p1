@@ -42,3 +42,16 @@ void sh_destroy(struct shell *sh)
 {
     free(sh);
 }
+
+int change_dir(char **dir)
+{
+    int retVal = chdir(*(dir));
+    if (retVal == 0)
+    {
+        return retVal;
+    }
+    else
+    {
+        return retVal;
+    }
+}
