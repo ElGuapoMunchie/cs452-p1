@@ -12,7 +12,6 @@ int main(int argc, char **argv)
   char *home;
   char **homePtr;
   int success;
-  char *path;
 
   int c;
 
