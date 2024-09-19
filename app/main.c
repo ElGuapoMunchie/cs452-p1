@@ -12,6 +12,7 @@ int main(int argc, char **argv)
   char *home;
   char **homePtr;
   int success;
+  char *path;
 
   int c;
 
@@ -63,6 +64,11 @@ int main(int argc, char **argv)
     { // 'cd' CHANGE DIRECTORY
 
       /* Case1: User enters nothing -> GOTO home directory*/
+      /*
+      - Readline -> delimmit on whitespace
+      - Check for 'cd'
+      - anything after that is 
+      */
       if (strcmp(line, "cd") == 0) // Litterally just "cd"
       {
         home = getenv("HOME");
@@ -75,6 +81,7 @@ int main(int argc, char **argv)
       }
 
       /* Case2: Change directory --> match directory name, goto directory || print error */
+
     }
     free(line);
   }
