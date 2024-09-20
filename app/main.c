@@ -15,6 +15,7 @@ int main(int argc, char **argv)
   int errorNumber;
   bool validCommand;
   struct shell *s;
+  int c;
 
   while ((c = getopt(argc, argv, "v")) != -1)
     switch (c)
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
     }
 
   /* Implement Custom Prompt Here */
-  sh_init();
+  sh_init(s);
   sh->prompt = get_prompt("MY_PROMPT");
 
   /* Now begin user process to handle user input */

@@ -97,14 +97,25 @@ char **cmd_parse(char const *line)
     /* Set up vars */
     char **arrayPtr;
     char *tokenArray = (char *)malloc(sizeof(char) * _SC_ARG_MAX);
+    char * copyOfLine;
+
+    /* Create a copy of the line to tokenize */
+    strcpy(copyOfLine, line);
 
     // Parse line to get all args and commands
-    char *token = strtok(line, " ");
+    char *token = strtok(copyOfLine, " ");
 
     // Copy into array to be returned while respecting ARGMAX
     int tokenCounter = 0;
     while (token[tokenCounter] != NULL || tokenCounter < _SC_ARG_MAX)
     {
+        /*
+        MARK!!!
+
+        You are here. Run `make check`
+        and deal with the "comparison between pointer and integer" issue here.
+    
+         */
         tokenArray[tokenCounter] = token[tokenCounter];
         tokenCounter++;
     }
