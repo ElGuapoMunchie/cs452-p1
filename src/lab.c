@@ -65,7 +65,9 @@ int change_dir(char **dir)
         if (retVal == 0)
         {
             return retVal;
-        } else {
+        }
+        else
+        {
             return retVal;
         }
     }
@@ -81,4 +83,52 @@ int change_dir(char **dir)
     {
         return retVal;
     }
+
+    /**
+     * @brief Convert line read from the user into to format that will work with
+     * execvp. We limit the number of arguments to ARG_MAX loaded from sysconf.
+     * This function allocates memory that must be reclaimed with the cmd_free
+     * function.
+     *
+     * @param line The line to process
+     *
+     * @return The line read in a format suitable for exec
+     */
+    char **cmd_parse(char const *line)
+    {
+
+        // If line is NULL -> CRTL + D so gtfo
+        if (line == NULL){
+            cmd_free(&line);
+            exit();
+        }
+
+        /* STEPS:
+        1. Tokenize string to get arguments for
+        */
+        char *tokenArray = char * malloc(sizeof((char)) * _SC_ARG_MAX);
+
+        // Parse line to get all args and commands
+        char *token = strtok(line, " ");
+
+        // Copy into array to be returned while respecting ARGMAX
+        int tokenCounter = 0;
+        while(token[i] != NULL || i < _SC_ARG_MAX){
+            tokenArray[i] = token[i];
+            i++;
+        }
+
+        // Grab the first command from the tokenizer
+        if (strcmp(token[0], "exit") == 0){     // EXIT
+            cmd_free();
+            exit();
+        }
+
+    void cmd_free(char **line)
+    {
+    }
+
+    // char *trim_white(char *line)
+    // {
+    // }
 }

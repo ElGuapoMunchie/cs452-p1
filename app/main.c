@@ -54,6 +54,7 @@ int main(int argc, char **argv)
   {
     printf("%s\n", line);
     add_history(line);
+    cmd_parse(line);
     if (strcmp(line, "exit") == 0 || line == NULL) // EXIT
     {
       free(line);
