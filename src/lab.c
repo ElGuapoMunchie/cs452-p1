@@ -7,6 +7,8 @@
 
 uid_t user;        // UserID Type
 struct passwd *pw; // Pointer to passwd struct
+char *home;
+char **homePtr;
 
 char *get_prompt(const char *env)
 {
@@ -34,10 +36,13 @@ char *get_prompt(const char *env)
 
 void sh_init(struct shell *sh)
 {
+    /* Allocate Shell Memory */
+    sh = (struct shell *)malloc(sizeof(struct shell));
+
     /* Initialize the shell with starter variables */
     sh->shell_is_interactive = 1;
     sh->shell_pgid = 1;
-    sh->shell_tmodes.c_iflag = 1;
+    sh->shell_tmodes.c_iflag = 0; // TODO: Does this need to be set? Set all off??
     sh->shell_terminal = 1;
     sh->prompt = "";
 }
@@ -51,7 +56,7 @@ int change_dir(char **dir)
 {
     int retVal;
 
-    /* Base Case: homeDir == Null, find HomeDir, goto HomeDir else throw error */
+    /* Base Case: If NULL, find home directory and go to it */
     if (*(dir) == NULL)
     {
         user = getuid();
@@ -74,120 +79,102 @@ int change_dir(char **dir)
 
     /* Case: Directory NOT NULL, goto directory */
     retVal = chdir(*(dir));
-    if (retVal == 0)
+    return retVal;
+}
+
+/**
+ * @brief Convert line read from the user into to format that will work with
+ * execvp. We limit the number of arguments to ARG_MAX loaded from sysconf.
+ * This function allocates memory that must be reclaimed with the cmd_free
+ * function.
+ *
+ * @param line The line to process
+ *
+ * @return The line read in a format suitable for exec
+ */
+char **cmd_parse(char const *line)
+{
+    /* Set up vars */
+    char **arrayPtr;
+    char *tokenArray = (char *)malloc(sizeof(char) * _SC_ARG_MAX);
+
+    // Parse line to get all args and commands
+    char *token = strtok(line, " ");
+
+    // Copy into array to be returned while respecting ARGMAX
+    int tokenCounter = 0;
+    while (token[tokenCounter] != NULL || tokenCounter < _SC_ARG_MAX)
     {
-        printf("%s~", *(dir));
-        return retVal;
+        tokenArray[tokenCounter] = token[tokenCounter];
+        tokenCounter++;
     }
-    else
+
+    /* Set the pointer to return the array */
+    arrayPtr = &tokenArray;
+    return arrayPtr;
+}
+
+/**
+ * @brief Free the line that was constructed with parse_cmd
+ *
+ * @param line the line to free
+ */
+void cmd_free(char **line)
+{
+    free(*line);
+    line = NULL;
+}
+
+/**
+ * @brief Trim the whitespace from the start and end of a string.
+ * For example "   ls -a   " becomes "ls -a". This function modifies
+ * the argument line so that all printable chars are moved to the
+ * front of the string
+ *
+ * @param line The line to trim
+ * @return The new line with no whitespace
+ */
+// char *trim_white(char *line)
+// {
+
+// }
+
+/**
+ * @brief Takes an argument list and checks if the first argument is a
+ * built in command such as exit, cd, jobs, etc. If the command is a
+ * built in command this function will handle the command and then return
+ * true. If the first argument is NOT a built in command this function will
+ * return false.
+ *
+ * @param sh The shell
+ * @param argv The command to check
+ * @return True if the command was a built in command
+ */
+bool do_builtin(struct shell *sh, char **argv)
+{
+
+    /* Compare input args to argsList */
+
+    // Exit Calls: ("exit" and CRTL+D)
+    if (strcmp(*(argv[0]), "exit") == 0 || (*argv[0] == NULL))
     {
-        return retVal;
+        free(*argv);
+        free(**argv);
+        free(sh);
+        exit(0);
     }
 
-    /**
-     * @brief Convert line read from the user into to format that will work with
-     * execvp. We limit the number of arguments to ARG_MAX loaded from sysconf.
-     * This function allocates memory that must be reclaimed with the cmd_free
-     * function.
-     *
-     * @param line The line to process
-     *
-     * @return The line read in a format suitable for exec
-     */
-    char **cmd_parse(char const *line)
+    // Change Directory:
+    if (strcmp(*argv[0], "cd") == 0)
     {
-
-        // If line is NULL -> CRTL + D so gtfo
-        if (line == NULL)
-        {
-            cmd_free(&line);
-            exit();
-        }
-
-        /* STEPS:
-        1. Tokenize string to get arguments for
-        */
-        char *tokenArray = char * malloc(sizeof((char)) * _SC_ARG_MAX);
-
-        // Parse line to get all args and commands
-        char *token = strtok(line, " ");
-
-        // Copy into array to be returned while respecting ARGMAX
-        int tokenCounter = 0;
-        while (token[i] != NULL || i < _SC_ARG_MAX)
-        {
-            tokenArray[i] = token[i];
-            i++;
-        }
-
-        // Grab the first command from the tokenizer
-        if (strcmp(token[0], "exit") == 0)
-        { // EXIT
-            cmd_free();
-            exit();
-        }
-
-        /**
-         * @brief Free the line that was constructed with parse_cmd
-         *
-         * @param line the line to free
-         */
-        void cmd_free(char **line)
-        {
-        }
-
-        /**
-         * @brief Trim the whitespace from the start and end of a string.
-         * For example "   ls -a   " becomes "ls -a". This function modifies
-         * the argument line so that all printable chars are moved to the
-         * front of the string
-         *
-         * @param line The line to trim
-         * @return The new line with no whitespace
-         */
-        char *trim_white(char *line)
-        {
-        }
-
-        /**
-         * @brief Takes an argument list and checks if the first argument is a
-         * built in command such as exit, cd, jobs, etc. If the command is a
-         * built in command this function will handle the command and then return
-         * true. If the first argument is NOT a built in command this function will
-         * return false.
-         *
-         * @param sh The shell
-         * @param argv The command to check
-         * @return True if the command was a built in command
-         */
-        bool do_builtin(struct shell * sh, char **argv);
-
-        /**
-         * @brief Initialize the shell for use. Allocate all data structures
-         * Grab control of the terminal and put the shell in its own
-         * process group. NOTE: This function will block until the shell is
-         * in its own program group. Attaching a debugger will always cause
-         * this function to fail because the debugger maintains control of
-         * the subprocess it is debugging.
-         *
-         * @param sh
-         */
-        void sh_init(struct shell * sh);
-
-        /**
-         * @brief Destroy shell. Free any allocated memory and resources and exit
-         * normally.
-         *
-         * @param sh
-         */
-        void sh_destroy(struct shell * sh);
-
-        // /**
-        //  * @brief Parse command line args from the user when the shell was launched
-        //  *
-        //  * @param argc Number of args
-        //  * @param argv The arg array
-        //  */
-        // void parse_args(int argc, char **argv);
-
+        change_dir(*argv[1]);
     }
+}
+
+/**
+ * @brief Parse command line args from the user when the shell was launched
+ *
+ * @param argc Number of args
+ * @param argv The arg array
+ */
+void parse_args(int argc, char **argv);

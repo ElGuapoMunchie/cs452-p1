@@ -5,15 +5,16 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "../src/lab.h"
+#include "stdbool.h"
 
 int main(int argc, char **argv)
 {
-  char *prompt;
-  char *home;
-  char **homePtr;
-  int success;
-
-  int c;
+  char *line;
+  char **linePointer;
+  char *retValPointer;
+  int errorNumber;
+  bool validCommand;
+  struct shell *s;
 
   while ((c = getopt(argc, argv, "v")) != -1)
     switch (c)
@@ -21,12 +22,6 @@ int main(int argc, char **argv)
     // Print version
     case 'v':
       printf("OS Version: %d.%d\n", lab_VERSION_MAJOR, lab_VERSION_MINOR);
-      break;
-    case 'b':
-      printf("get b here");
-      break;
-    case 'c':
-      printf("get c here");
       break;
     case '?':
       if (optopt == 'c')
@@ -44,50 +39,42 @@ int main(int argc, char **argv)
     }
 
   /* Implement Custom Prompt Here */
-  prompt = get_prompt("MY_PROMPT");
+  sh_init();
+  sh->prompt = get_prompt("MY_PROMPT");
 
   /* Now begin user process to handle user input */
-  char *line;
-  // char *lineCompare = "";
   using_history();
   while ((line = readline("$")))
   {
+    /* Print the line */
     printf("%s\n", line);
+
+    /* Add to the history */
     add_history(line);
+
+    /* Trim Whitespace */
+    // line = trim_white(line);
+
+    /* Parse the CommandLine */
     cmd_parse(line);
-    if (strcmp(line, "exit") == 0 || line == NULL) // EXIT
-    {
+
+    /* Handle Args */
+    validCommand = do_builtin(sh, linePointer);
+    if (validCommand == false){
+      // Error and Abort
+      cmd_free(linePointer);
       free(line);
-      break;
+      sh_destroy(s);
+      exit(-1);
     }
-    if (strncmp(line, "cd", 2) == 0)
-    { // 'cd' CHANGE DIRECTORY
 
-      /* Case1: User enters nothing -> GOTO home directory*/
-      /*
-      - Readline -> delimmit on whitespace
-      - Check for 'cd'
-      - anything after that is 
-      */
-      if (strcmp(line, "cd") == 0) // Litterally just "cd"
-      {
-        home = getenv("HOME");
-        homePtr = &home;
-        success = change_dir(homePtr);
-
-        if (success == -1){ // ERROR ENCOUNTERED
-          exit(1);
-        }
-      }
-
-      /* Case2: Change directory --> match directory name, goto directory || print error */
-
-    }
-    free(line);
+    /* Free the line */
+    cmd_free(linePointer);
   }
 
   /* Free All Items and Data */
-  free(prompt);
+  cmd_free(linePointer);
+  sh_destroy(s);
 
   return 0;
 }
