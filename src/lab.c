@@ -98,7 +98,8 @@ int change_dir(char **dir)
     {
 
         // If line is NULL -> CRTL + D so gtfo
-        if (line == NULL){
+        if (line == NULL)
+        {
             cmd_free(&line);
             exit();
         }
@@ -113,22 +114,80 @@ int change_dir(char **dir)
 
         // Copy into array to be returned while respecting ARGMAX
         int tokenCounter = 0;
-        while(token[i] != NULL || i < _SC_ARG_MAX){
+        while (token[i] != NULL || i < _SC_ARG_MAX)
+        {
             tokenArray[i] = token[i];
             i++;
         }
 
         // Grab the first command from the tokenizer
-        if (strcmp(token[0], "exit") == 0){     // EXIT
+        if (strcmp(token[0], "exit") == 0)
+        { // EXIT
             cmd_free();
             exit();
         }
 
-    void cmd_free(char **line)
-    {
-    }
+        /**
+         * @brief Free the line that was constructed with parse_cmd
+         *
+         * @param line the line to free
+         */
+        void cmd_free(char **line)
+        {
+        }
 
-    // char *trim_white(char *line)
-    // {
-    // }
-}
+        /**
+         * @brief Trim the whitespace from the start and end of a string.
+         * For example "   ls -a   " becomes "ls -a". This function modifies
+         * the argument line so that all printable chars are moved to the
+         * front of the string
+         *
+         * @param line The line to trim
+         * @return The new line with no whitespace
+         */
+        char *trim_white(char *line)
+        {
+        }
+
+        /**
+         * @brief Takes an argument list and checks if the first argument is a
+         * built in command such as exit, cd, jobs, etc. If the command is a
+         * built in command this function will handle the command and then return
+         * true. If the first argument is NOT a built in command this function will
+         * return false.
+         *
+         * @param sh The shell
+         * @param argv The command to check
+         * @return True if the command was a built in command
+         */
+        bool do_builtin(struct shell * sh, char **argv);
+
+        /**
+         * @brief Initialize the shell for use. Allocate all data structures
+         * Grab control of the terminal and put the shell in its own
+         * process group. NOTE: This function will block until the shell is
+         * in its own program group. Attaching a debugger will always cause
+         * this function to fail because the debugger maintains control of
+         * the subprocess it is debugging.
+         *
+         * @param sh
+         */
+        void sh_init(struct shell * sh);
+
+        /**
+         * @brief Destroy shell. Free any allocated memory and resources and exit
+         * normally.
+         *
+         * @param sh
+         */
+        void sh_destroy(struct shell * sh);
+
+        // /**
+        //  * @brief Parse command line args from the user when the shell was launched
+        //  *
+        //  * @param argc Number of args
+        //  * @param argv The arg array
+        //  */
+        // void parse_args(int argc, char **argv);
+
+    }
