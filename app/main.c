@@ -9,12 +9,14 @@
 
 int main(int argc, char **argv)
 {
+  char *prompt;
   char *line;
   char **linePointer;
-  char *retValPointer;
-  int errorNumber;
+  char **lineRetPointer;
+  // char *retValPointer;
+  // int errorNumber;
   bool validCommand;
-  struct shell *s;
+  struct shell myShell;
   int c;
 
   while ((c = getopt(argc, argv, "v")) != -1)
@@ -40,8 +42,10 @@ int main(int argc, char **argv)
     }
 
   /* Implement Custom Prompt Here */
-  sh_init(s);
-  sh->prompt = get_prompt("MY_PROMPT");
+
+  sh_init(&myShell);
+  prompt = get_prompt("MY_PROMPT");
+  myShell.prompt = prompt;
 
   /* Now begin user process to handle user input */
   using_history();
@@ -57,15 +61,16 @@ int main(int argc, char **argv)
     // line = trim_white(line);
 
     /* Parse the CommandLine */
-    cmd_parse(line);
+    lineRetPointer = cmd_parse(line);
+    linePointer = *(&lineRetPointer);
 
     /* Handle Args */
-    validCommand = do_builtin(sh, linePointer);
+    validCommand = do_builtin(&myShell, linePointer);
     if (validCommand == false){
       // Error and Abort
       cmd_free(linePointer);
       free(line);
-      sh_destroy(s);
+      sh_destroy(&myShell);
       exit(-1);
     }
 
@@ -75,7 +80,7 @@ int main(int argc, char **argv)
 
   /* Free All Items and Data */
   cmd_free(linePointer);
-  sh_destroy(s);
+  sh_destroy(&myShell);
 
   return 0;
 }

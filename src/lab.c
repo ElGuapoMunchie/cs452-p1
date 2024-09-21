@@ -9,6 +9,7 @@ uid_t user;        // UserID Type
 struct passwd *pw; // Pointer to passwd struct
 char *home;
 char **homePtr;
+bool retVal;
 
 char *get_prompt(const char *env)
 {
@@ -16,6 +17,7 @@ char *get_prompt(const char *env)
     {
         char *retEnv = (char *)malloc(sizeof(char) * MAX_LENGTH);
         retEnv = strcpy(retEnv, getenv(env));
+        // printf("%s", retEnv);
         return retEnv;
         free(retEnv);
     }
@@ -29,6 +31,7 @@ char *get_prompt(const char *env)
         pmt[4] = 'l';
         pmt[5] = '>';
         pmt[6] = '\0';
+        // printf("%s", pmt);
         return pmt;
         free(pmt);
     }
@@ -44,7 +47,7 @@ void sh_init(struct shell *sh)
     sh->shell_pgid = 1;
     sh->shell_tmodes.c_iflag = 0; // TODO: Does this need to be set? Set all off??
     sh->shell_terminal = 1;
-    sh->prompt = "";
+    sh->prompt = NULL;
 }
 
 void sh_destroy(struct shell *sh)
@@ -94,35 +97,45 @@ int change_dir(char **dir)
  */
 char **cmd_parse(char const *line)
 {
-    /* Set up vars */
-    char **arrayPtr;
-    char *tokenArray = (char *)malloc(sizeof(char) * _SC_ARG_MAX);
-    char * copyOfLine;
+    /*
+    NOTE: FIRST element of args will be the COMMAND.
+          FINAL element of args will be the NULL POINTER.
+     */
+    char *lineCopy;
+    char **arguments = (char **)malloc(sizeof(char *) * _SC_ARG_MAX); // Allocate memory for args
+    char *token;
+    int tracker = 0;
 
-    /* Create a copy of the line to tokenize */
-    strcpy(copyOfLine, line);
-
-    // Parse line to get all args and commands
-    char *token = strtok(copyOfLine, " ");
-
-    // Copy into array to be returned while respecting ARGMAX
-    int tokenCounter = 0;
-    while (token[tokenCounter] != NULL || tokenCounter < _SC_ARG_MAX)
+    // Check that there was enough space for arguments:
+    if (arguments == NULL)
     {
-        /*
-        MARK!!!
-
-        You are here. Run `make check`
-        and deal with the "comparison between pointer and integer" issue here.
-    
-         */
-        tokenArray[tokenCounter] = token[tokenCounter];
-        tokenCounter++;
+        perror("Failed to allocate memory");
+        exit(-1); // Exit if allocation fails
     }
 
-    /* Set the pointer to return the array */
-    arrayPtr = &tokenArray;
-    return arrayPtr;
+    // Copy the line
+    lineCopy = strdup(line);
+
+    // Parse lineCopy to get command
+    token = strtok(lineCopy, " ");
+    arguments[tracker] = strdup(token);
+    tracker++;
+    
+    // Parse arguments
+    token = strtok(NULL, " ");
+    while (token != NULL && tracker < _SC_ARG_MAX - 1)
+    {
+        arguments[tracker] = strdup(token);
+        tracker++;
+
+        // printf("%s\n", arguments[tracker]);
+        token = strtok(NULL, " ");
+    }
+
+    arguments[tracker] = NULL; // Set end NULL pointer
+
+    // Get retVal and GTFO
+    return arguments;
 }
 
 /**
@@ -165,21 +178,36 @@ bool do_builtin(struct shell *sh, char **argv)
 {
 
     /* Compare input args to argsList */
+    retVal = false;
+
+    /* Variables to do something? */
+    char const *argv0 = argv[0];
+    char **argv1ptr = &argv[1];
 
     // Exit Calls: ("exit" and CRTL+D)
-    if (strcmp(*(argv[0]), "exit") == 0 || (*argv[0] == NULL))
+    if (strcmp(argv0, "exit") == 0 || (argv0 == NULL))
     {
-        free(*argv);
-        free(**argv);
+        retVal = true;
+        if (argv != NULL)
+        {
+            for (int i = 0; argv[i] != NULL; i++)
+            {
+                free(argv[i]); // Free each string
+            }
+            free(argv); // Free the array of pointers
+        }
+        // free(*argv);
         free(sh);
         exit(0);
     }
 
     // Change Directory:
-    if (strcmp(*argv[0], "cd") == 0)
+    if (strcmp(argv0, "cd") == 0)
     {
-        change_dir(*argv[1]);
+        change_dir(argv1ptr);
+        retVal = true;
     }
+    return retVal;
 }
 
 /**
