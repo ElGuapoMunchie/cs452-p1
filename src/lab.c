@@ -4,6 +4,7 @@
 #include "pwd.h"
 
 #define MAX_LENGTH 10 // This may need to be adjusted for when you get the PATH
+#define MAX_SIZE 4096
 
 uid_t user;        // UserID Type
 struct passwd *pw; // Pointer to passwd struct
@@ -58,6 +59,7 @@ void sh_destroy(struct shell *sh)
 int change_dir(char **dir)
 {
     int retVal;
+    printf("directory selected: %s\n", *(dir));
 
     /* Base Case: If NULL, find home directory and go to it */
     if (*(dir) == NULL)
@@ -82,6 +84,11 @@ int change_dir(char **dir)
 
     /* Case: Directory NOT NULL, goto directory */
     retVal = chdir(*(dir));
+    printf("changed directory");
+    if (retVal != 0)
+    {
+        fprintf(stderr, "ch command failed. %s is not a valid directory.", *(dir));
+    }
     return retVal;
 }
 
@@ -102,7 +109,7 @@ char **cmd_parse(char const *line)
           FINAL element of args will be the NULL POINTER.
      */
     char *lineCopy;
-    char **arguments = (char **)malloc(sizeof(char *) * _SC_ARG_MAX); // Allocate memory for args
+    char **arguments = (char **)malloc(sizeof(char *) * MAX_SIZE); // Allocate memory for args
     char *token;
     int tracker = 0;
 
@@ -176,13 +183,14 @@ void cmd_free(char **line)
  */
 bool do_builtin(struct shell *sh, char **argv)
 {
-
     /* Compare input args to argsList */
     retVal = false;
 
     /* Variables to do something? */
     char const *argv0 = argv[0];
     char **argv1ptr = &argv[1];
+
+    printf("argvPtr is: %s", *(argv1ptr));
 
     // Exit Calls: ("exit" and CRTL+D)
     if (strcmp(argv0, "exit") == 0 || (argv0 == NULL))
@@ -197,6 +205,9 @@ bool do_builtin(struct shell *sh, char **argv)
             free(argv); // Free the array of pointers
         }
         // free(*argv);
+
+        /* Free the shell */
+        free(sh->prompt);
         free(sh);
         exit(0);
     }
