@@ -4,7 +4,7 @@
 #include "pwd.h"
 
 #define MAX_LENGTH 10 // This may need to be adjusted for when you get the PATH
-#define MAX_SIZE 4096
+#define ARG_MAX 4096  // MAX SIZE allowed
 
 uid_t user;        // UserID Type
 struct passwd *pw; // Pointer to passwd struct
@@ -40,8 +40,8 @@ char *get_prompt(const char *env)
 
 void sh_init(struct shell *sh)
 {
-    /* Allocate Shell Memory */
-    sh = (struct shell *)malloc(sizeof(struct shell));
+    /* Allocate Shell Memory --> DON"T NEED TO DO THIS*/
+    // sh = (struct shell *)malloc(sizeof(struct shell));
 
     /* Initialize the shell with starter variables */
     sh->shell_is_interactive = 1;
@@ -53,13 +53,14 @@ void sh_init(struct shell *sh)
 
 void sh_destroy(struct shell *sh)
 {
-    free(sh);
+    // TODO: May need to free other shell structures
+    free(sh->prompt);
 }
 
 int change_dir(char **dir)
 {
     int retVal;
-    printf("directory selected: %s\n", *(dir));
+    // printf("directory selected: %s\n", *(dir));
 
     /* Base Case: If NULL, find home directory and go to it */
     if (*(dir) == NULL)
@@ -68,7 +69,7 @@ int change_dir(char **dir)
         pw = getpwuid(user);
         if (pw == NULL)
         {
-            perror("user is not valid (pwuid is NULL)");
+            perror("user is not valid (pwuid is NULL)\n");
             return -1;
         }
         retVal = chdir(pw->pw_dir); // Move to user's homeDir
@@ -84,10 +85,13 @@ int change_dir(char **dir)
 
     /* Case: Directory NOT NULL, goto directory */
     retVal = chdir(*(dir));
-    printf("changed directory");
+    // if (retVal == 0)
+    // {
+    //     printf("successfully changed directory\n");
+    // }
     if (retVal != 0)
     {
-        fprintf(stderr, "ch command failed. %s is not a valid directory.", *(dir));
+        fprintf(stderr, "ch command failed. %s is not a valid directory.\n", *(dir));
     }
     return retVal;
 }
@@ -109,7 +113,7 @@ char **cmd_parse(char const *line)
           FINAL element of args will be the NULL POINTER.
      */
     char *lineCopy;
-    char **arguments = (char **)malloc(sizeof(char *) * MAX_SIZE); // Allocate memory for args
+    char **arguments = (char **)malloc(sizeof(char *) * ARG_MAX); // Allocate memory for args
     char *token;
     int tracker = 0;
 
@@ -126,13 +130,16 @@ char **cmd_parse(char const *line)
     // Parse lineCopy to get command
     token = strtok(lineCopy, " ");
     arguments[tracker] = strdup(token);
+    // printf("first token: %s\n", arguments[tracker]);
+
     tracker++;
-    
+
     // Parse arguments
     token = strtok(NULL, " ");
-    while (token != NULL && tracker < _SC_ARG_MAX - 1)
+    while (token != NULL && tracker < ARG_MAX - 1)
     {
         arguments[tracker] = strdup(token);
+        // printf("next token: %s\n", arguments[tracker]);
         tracker++;
 
         // printf("%s\n", arguments[tracker]);
@@ -190,8 +197,6 @@ bool do_builtin(struct shell *sh, char **argv)
     char const *argv0 = argv[0];
     char **argv1ptr = &argv[1];
 
-    printf("argvPtr is: %s", *(argv1ptr));
-
     // Exit Calls: ("exit" and CRTL+D)
     if (strcmp(argv0, "exit") == 0 || (argv0 == NULL))
     {
@@ -207,8 +212,7 @@ bool do_builtin(struct shell *sh, char **argv)
         // free(*argv);
 
         /* Free the shell */
-        free(sh->prompt);
-        free(sh);
+        sh_destroy(sh);
         exit(0);
     }
 
