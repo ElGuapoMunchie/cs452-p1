@@ -1,8 +1,19 @@
 #include <string.h>
 #include "../tests/harness/unity.h"
-#include "lab.h"
-#include "pwd.h"
-#include "readline/history.h"
+#include "../src/lab.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <bits/getopt_core.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#define _POSIX_SOURCE
 
 #define MAX_LENGTH 10 // This may need to be adjusted for when you get the PATH
 #define ARG_MAX 4096  // MAX SIZE allowed
@@ -91,7 +102,7 @@ int change_dir(char **dir)
     // }
     if (retVal != 0)
     {
-        fprintf(stderr, "cd command failed. %s is not a valid directory.\n", *(dir));
+        fprintf(stderr, "cd command failed. %s is not a valid directory.\n", dir[1]);
     }
     return retVal;
 }
@@ -149,6 +160,7 @@ char **cmd_parse(char const *line)
     arguments[tracker] = NULL; // Set end NULL pointer
 
     // fprintf(stdout, "Printing arg[1]: %s\n", arguments[1]);
+    free(lineCopy);
 
     // Get retVal and GTFO
     return arguments;
@@ -198,6 +210,7 @@ bool do_builtin(struct shell *sh, char **argv)
     /* Variables to do something? */
     char const *argv0 = argv[0];
 
+
     // Exit Calls: ("exit" and CRTL+D)
     int c = argv0[0];
     if (strcmp(argv0, "exit") == 0 || (c == EOF))
@@ -212,7 +225,7 @@ bool do_builtin(struct shell *sh, char **argv)
             free(argv); // Free the array of pointers
         }
 
-        printf("\n");   // print new line to make the console look pretty
+        printf("\n"); // print new line to make the console look pretty
 
         /* Free the shell */
         sh_destroy(sh);
@@ -227,8 +240,21 @@ bool do_builtin(struct shell *sh, char **argv)
     }
 
     // History Command:
-    if (strcmp(argv0, "history") == 0){
-        HIST_ENTRY **history_list = history_list();
+    if (strcmp(argv0, "history") == 0)
+    {
+        retVal = true;
+        HIST_ENTRY **history_entries = history_list(); // Store the returned history entries
+        if (history_entries)
+        {
+            for (int i = 0; history_entries[i] != NULL; i++)
+            {
+                printf("%d %s\n", i + 1, history_entries[i]->line);
+            }
+        }
+        else
+        {
+            printf("No history available.\n");
+        }
     }
 
     return retVal;

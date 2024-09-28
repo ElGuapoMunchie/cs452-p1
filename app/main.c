@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "../src/lab.h"
 #include "stdbool.h"
+#include "readline/history.h"
+#include "readline/readline.h"
 
 int main(int argc, char **argv)
 {
@@ -65,11 +67,14 @@ int main(int argc, char **argv)
     /* Handle Args */
     validCommand = do_builtin(&myShell, linePointer);
     if (validCommand == false){
-      // Error and Abort
-      cmd_free(linePointer);
-      free(line);
-      sh_destroy(&myShell);
-      exit(-1);
+
+      printf("%s is not a valid command.\n", linePointer[0]);
+
+      // // Error and Abort
+      // cmd_free(linePointer);
+      // free(line);
+      // sh_destroy(&myShell);
+      // exit(-1);
     }
 
     /* Free the line */
