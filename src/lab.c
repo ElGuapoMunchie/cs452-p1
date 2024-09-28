@@ -2,6 +2,7 @@
 #include "../tests/harness/unity.h"
 #include "lab.h"
 #include "pwd.h"
+#include "readline/history.h"
 
 #define MAX_LENGTH 10 // This may need to be adjusted for when you get the PATH
 #define ARG_MAX 4096  // MAX SIZE allowed
@@ -224,6 +225,12 @@ bool do_builtin(struct shell *sh, char **argv)
         change_dir(argv);
         retVal = true;
     }
+
+    // History Command:
+    if (strcmp(argv0, "history") == 0){
+        HIST_ENTRY **history_list = history_list();
+    }
+
     return retVal;
 }
 

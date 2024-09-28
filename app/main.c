@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include "../src/lab.h"
 #include "stdbool.h"
 

@@ -3,7 +3,8 @@
 > 9/28/24
 RECENT EVENTS:
 - I'm passing the tests for the `cd` command apparently. So that's good news.
-- 
+- I've decided to ***prioritize the history command*** and completing the task. I think that fixing the memory leak in the tester will be a future me problem. Or at least something I don't need to
+worry too much about.
 
 TODO
 - Fix memory leaks from the tester file.
