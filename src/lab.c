@@ -60,10 +60,9 @@ void sh_destroy(struct shell *sh)
 int change_dir(char **dir)
 {
     int retVal;
-    // printf("directory selected: %s\n", *(dir));
 
     /* Base Case: If NULL, find home directory and go to it */
-    if (*(dir) == NULL)
+    if (dir[1] == NULL)
     {
         user = getuid();
         pw = getpwuid(user);
@@ -84,14 +83,14 @@ int change_dir(char **dir)
     }
 
     /* Case: Directory NOT NULL, goto directory */
-    retVal = chdir(*(dir));
+    retVal = chdir(dir[1]);
     // if (retVal == 0)
     // {
     //     printf("successfully changed directory\n");
     // }
     if (retVal != 0)
     {
-        fprintf(stderr, "ch command failed. %s is not a valid directory.\n", *(dir));
+        fprintf(stderr, "cd command failed. %s is not a valid directory.\n", *(dir));
     }
     return retVal;
 }
@@ -120,7 +119,7 @@ char **cmd_parse(char const *line)
     // Check that there was enough space for arguments:
     if (arguments == NULL)
     {
-        perror("Failed to allocate memory");
+        perror("Failed to allocate memory\n");
         exit(-1); // Exit if allocation fails
     }
 
@@ -147,6 +146,8 @@ char **cmd_parse(char const *line)
     }
 
     arguments[tracker] = NULL; // Set end NULL pointer
+
+    // fprintf(stdout, "Printing arg[1]: %s\n", arguments[1]);
 
     // Get retVal and GTFO
     return arguments;
@@ -195,10 +196,10 @@ bool do_builtin(struct shell *sh, char **argv)
 
     /* Variables to do something? */
     char const *argv0 = argv[0];
-    char **argv1ptr = &argv[1];
 
     // Exit Calls: ("exit" and CRTL+D)
-    if (strcmp(argv0, "exit") == 0 || (argv0 == NULL))
+    int c = argv0[0];
+    if (strcmp(argv0, "exit") == 0 || (c == EOF))
     {
         retVal = true;
         if (argv != NULL)
@@ -209,7 +210,8 @@ bool do_builtin(struct shell *sh, char **argv)
             }
             free(argv); // Free the array of pointers
         }
-        // free(*argv);
+
+        printf("\n");   // print new line to make the console look pretty
 
         /* Free the shell */
         sh_destroy(sh);
@@ -219,7 +221,7 @@ bool do_builtin(struct shell *sh, char **argv)
     // Change Directory:
     if (strcmp(argv0, "cd") == 0)
     {
-        change_dir(argv1ptr);
+        change_dir(argv);
         retVal = true;
     }
     return retVal;

@@ -1,4 +1,14 @@
 # Changelist
+
+> 9/28/24
+RECENT EVENTS:
+- I'm passing the tests for the `cd` command apparently. So that's good news.
+- 
+
+TODO
+- Fix memory leaks from the tester file.
+- Add the rest of the commands into `do_builtin`.
+
 > 9/26/24
 
 RECENT EVENTS
@@ -9,6 +19,6 @@ shell object is initialized in Main, it's placed (allocated) on the stack and do
 tokenizes the string.
 
 TODO
-- figure out if `cmd_parse` actually parses the args (specifically arg[1] for cd)
-- Learn more about `**char` and how they reference strings.
-
+- figure out if `cmd_parse` actually parses the args (specifically arg[1] for cd) --> Seems like it does
+- Learn more about `**char` and how they reference strings.  --> Treat them like a string array. \
+So we changed *(div) to div[1] to get the second part of whatever is being referred to.
