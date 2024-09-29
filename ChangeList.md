@@ -2,11 +2,16 @@
 
 > 9/28/24
 RECENT EVENTS:
+- I need to find a way to free the memory stored from keeping a history list. I wonder if there's a way to clear it.
+
+===== Completed =====
 - I'm passing the tests for the `cd` command apparently. So that's good news.
 - I've decided to ***prioritize the history command*** and completing the task. I think that fixing the memory leak in the tester will be a future me problem. Or at least something I don't need to
 worry too much about.
 
 TODO
+
+===== Completed =====
 - Fix memory leaks from the tester file.
 - Add the rest of the commands into `do_builtin`.
 

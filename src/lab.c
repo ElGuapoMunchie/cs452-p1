@@ -23,6 +23,7 @@ struct passwd *pw; // Pointer to passwd struct
 char *home;
 char **homePtr;
 bool retVal;
+HIST_ENTRY **history_entries;
 
 char *get_prompt(const char *env)
 {
@@ -173,7 +174,11 @@ char **cmd_parse(char const *line)
  */
 void cmd_free(char **line)
 {
-    free(*line);
+    for (int i = 0; line[i] != NULL; i++)
+    {
+        free(line[i]);
+    }
+    free(line);
     line = NULL;
 }
 
@@ -210,7 +215,6 @@ bool do_builtin(struct shell *sh, char **argv)
     /* Variables to do something? */
     char const *argv0 = argv[0];
 
-
     // Exit Calls: ("exit" and CRTL+D)
     int c = argv0[0];
     if (strcmp(argv0, "exit") == 0 || (c == EOF))
@@ -224,6 +228,10 @@ bool do_builtin(struct shell *sh, char **argv)
             }
             free(argv); // Free the array of pointers
         }
+
+        // Clear history if not already gone
+        clear_history();
+        free(history_entries);
 
         printf("\n"); // print new line to make the console look pretty
 
@@ -243,9 +251,10 @@ bool do_builtin(struct shell *sh, char **argv)
     if (strcmp(argv0, "history") == 0)
     {
         retVal = true;
-        HIST_ENTRY **history_entries = history_list(); // Store the returned history entries
+        history_entries = history_list(); // Store the returned history entries
         if (history_entries)
         {
+            // Print history to user
             for (int i = 0; history_entries[i] != NULL; i++)
             {
                 printf("%d %s\n", i + 1, history_entries[i]->line);
