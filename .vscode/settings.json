@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "unity.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "sstream": "c"
     }
 }
