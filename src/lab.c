@@ -24,6 +24,7 @@ char *home;
 char **homePtr;
 bool retVal;
 HIST_ENTRY **history_entries;
+char cwd[1024];
 
 char *get_prompt(const char *env)
 {
@@ -268,8 +269,8 @@ bool do_builtin(struct shell *sh, char **argv)
         }
 
         // Clear history if not already gone
-        clear_history();
-        free(history_entries);
+        // clear_history();
+        // free(history_entries);
 
         printf("\n"); // print new line to make the console look pretty
 
@@ -302,6 +303,12 @@ bool do_builtin(struct shell *sh, char **argv)
         {
             printf("No history available.\n");
         }
+    }
+
+    if (strcmp(argv0, "pwd") == 0){
+        getcwd(cwd, sizeof(cwd));
+        printf("%s\n", cwd);
+        retVal = true;
     }
 
     return retVal;

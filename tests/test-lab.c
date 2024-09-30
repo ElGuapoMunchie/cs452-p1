@@ -49,68 +49,68 @@ void test_cmd_parse(void)
      cmd_free(rval);
 }
 
-// void test_trim_white_no_whitespace(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "ls -a", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("ls -a", rval);
-//      free(line);
-// }
+void test_trim_white_no_whitespace(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "ls -a", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("ls -a", rval);
+     free(line);
+}
 
-// void test_trim_white_start_whitespace(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "  ls -a", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("ls -a", rval);
-//      free(line);
-// }
+void test_trim_white_start_whitespace(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "  ls -a", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("ls -a", rval);
+     free(line);
+}
 
-// void test_trim_white_end_whitespace(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "ls -a  ", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("ls -a", rval);
-//      free(line);
-// }
+void test_trim_white_end_whitespace(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "ls -a  ", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("ls -a", rval);
+     free(line);
+}
 
-// void test_trim_white_both_whitespace_single(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, " ls -a ", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("ls -a", rval);
-//      free(line);
-// }
+void test_trim_white_both_whitespace_single(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, " ls -a ", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("ls -a", rval);
+     free(line);
+}
 
-// void test_trim_white_both_whitespace_double(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "  ls -a  ", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("ls -a", rval);
-//      free(line);
-// }
+void test_trim_white_both_whitespace_double(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "  ls -a  ", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("ls -a", rval);
+     free(line);
+}
 
-// void test_trim_white_all_whitespace(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "  ", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("", rval);
-//      free(line);
-// }
+void test_trim_white_all_whitespace(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "  ", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("", rval);
+     free(line);
+}
 
-// void test_trim_white_mostly_whitespace(void)
-// {
-//      char *line = (char*) calloc(10, sizeof(char));
-//      strncpy(line, "    a    ", 10);
-//      char *rval = trim_white(line);
-//      TEST_ASSERT_EQUAL_STRING("a", rval);
-//      free(line);
-// }
+void test_trim_white_mostly_whitespace(void)
+{
+     char *line = (char*) calloc(10, sizeof(char));
+     strncpy(line, "    a    ", 10);
+     char *rval = trim_white(line);
+     TEST_ASSERT_EQUAL_STRING("a", rval);
+     free(line);
+}
 
 void test_get_prompt_default(void)
 {
@@ -164,12 +164,13 @@ int main(void) {
 
   RUN_TEST(test_cmd_parse);
   RUN_TEST(test_cmd_parse2);
-//   RUN_TEST(test_trim_white_no_whitespace);
-//   RUN_TEST(test_trim_white_start_whitespace);
-//   RUN_TEST(test_trim_white_end_whitespace);
-//   RUN_TEST(test_trim_white_both_whitespace_single);
-//   RUN_TEST(test_trim_white_both_whitespace_double);
-//   RUN_TEST(test_trim_white_all_whitespace);
+  RUN_TEST(test_trim_white_no_whitespace);
+  RUN_TEST(test_trim_white_start_whitespace);
+  RUN_TEST(test_trim_white_end_whitespace);
+  RUN_TEST(test_trim_white_both_whitespace_single);
+  RUN_TEST(test_trim_white_both_whitespace_double);
+  RUN_TEST(test_trim_white_mostly_whitespace);
+  RUN_TEST(test_trim_white_all_whitespace);
   RUN_TEST(test_get_prompt_default);
   RUN_TEST(test_get_prompt_custom);
   RUN_TEST(test_ch_dir_home);
