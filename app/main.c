@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     validCommand = do_builtin(&myShell, linePointer);
     if (validCommand == false){
 
-      printf("%s is not a valid command.\n", linePointer[0]);
+      printf("\'%s\' is not a valid command.\n", linePointer[0]);
 
       // // Error and Abort
       // cmd_free(linePointer);

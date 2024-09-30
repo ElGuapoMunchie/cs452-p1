@@ -103,7 +103,7 @@ int change_dir(char **dir)
     // }
     if (retVal != 0)
     {
-        fprintf(stderr, "cd command failed. %s is not a valid directory.\n", dir[1]);
+        fprintf(stderr, "\'cd\' command failed. \'%s\' is not a valid directory.\n", dir[1]);
     }
     return retVal;
 }
@@ -193,38 +193,44 @@ void cmd_free(char **line)
  */
 char *trim_white(char *line)
 {
-        char *p = (char *)line; // Pointer to read from
-    char *q;              // Pointer to write to
-    size_t length = 0;
+    char *p = (char *)line; // Pointer to read from
+    char *q;                // Pointer to write to
 
     // Count leading whitespace
-    while (isspace((unsigned char)*p)) p++;
+    while (isspace((unsigned char)*p))
+        p++;
 
     // Create a buffer to store the normalized string
     char *normalized = (char *)malloc(strlen(line) + 1); // Allocate maximum needed space
-    if (!normalized) {
+    if (!normalized)
+    {
         perror("Failed to allocate memory");
         return NULL; // Return NULL on allocation failure
     }
     q = normalized; // Set the write pointer to the beginning of the buffer
 
     // Traverse through the string and normalize spaces
-    while (*p != '\0') {
+    while (*p != '\0')
+    {
         // If the current character is not a space, copy it to the output
-        if (!isspace((unsigned char)*p)) {
+        if (!isspace((unsigned char)*p))
+        {
             *q++ = *p; // Copy non-whitespace character
-        } else if (q != normalized && *(q - 1) != ' ') {
+        }
+        else if (q != normalized && *(q - 1) != ' ')
+        {
             *q++ = ' '; // Replace multiple spaces with a single space
         }
         p++;
     }
 
     // Remove trailing whitespace
-    if (q != normalized && isspace((unsigned char)*(q - 1))) {
+    if (q != normalized && isspace((unsigned char)*(q - 1)))
+    {
         q--; // Move back to remove the last space if it exists
     }
 
-    *q = '\0'; // Null terminate the modified string
+    *q = '\0';         // Null terminate the modified string
     return normalized; // Return the modified string
 }
 
