@@ -54,12 +54,38 @@ char *get_prompt(const char *env)
 
 void sh_init(struct shell *sh)
 {
-    /* Initialize the shell with starter variables */
-    sh->shell_is_interactive = 1;
-    sh->shell_pgid = 1; // Process id
-    sh->shell_tmodes.c_iflag = 0; // TODO: Does this need to be set? Set all off??
-    sh->shell_terminal = 1;
-    sh->prompt = NULL;
+    /* See if we are running interactively.  */
+    sh->shell_terminal = STDIN_FILENO;
+    sh->shell_is_interactive = isatty(sh->shell_terminal);
+
+    if (sh->shell_is_interactive)
+    {
+        /* Loop until we are in the foreground.  */
+        while (tcgetpgrp(sh->shell_terminal) != (sh->shell_pgid = getpgrp()))
+            kill(-sh->shell_pgid, SIGTTIN);
+
+        /* Ignore interactive and job-control signals.  */
+        signal(SIGINT, SIG_IGN);
+        signal(SIGQUIT, SIG_IGN);
+        signal(SIGTSTP, SIG_IGN);
+        signal(SIGTTIN, SIG_IGN);
+        signal(SIGTTOU, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
+
+        /* Put ourselves in our own process group.  */
+        sh->shell_pgid = getpid();
+        if (setpgid(sh->shell_pgid, sh->shell_pgid) < 0)
+        {
+            perror("Couldn't put the shell in its own process group");
+            exit(1);
+        }
+
+        /* Grab control of the terminal.  */
+        tcsetpgrp(sh->shell_terminal, sh->shell_pgid);
+
+        /* Save default terminal attributes for shell.  */
+        tcgetattr(sh->shell_terminal, &sh->shell_tmodes);
+    }
 }
 
 void sh_destroy(struct shell *sh)
@@ -228,18 +254,20 @@ char *trim_white(char *line)
         q--; // Move back to remove the last space if it exists
     }
 
-    *q = '\0';         // Null terminate the modified string
+    *q = '\0'; // Null terminate the modified string
 
-// Copy dup string to original, free dup
+    // Copy dup string to original, free dup
     strcpy(line, normalized);
 
     int i = 0;
     char c = line[i];
-    while (c != '\0'){
+    while (c != '\0')
+    {
         c = line[i];
         i++;
     }
-    while (i < strlen(line)){
+    while (i < strlen(line))
+    {
         line[i] = '\0';
     }
 
@@ -318,7 +346,8 @@ bool do_builtin(struct shell *sh, char **argv)
         }
     }
 
-    if (strcmp(argv0, "pwd") == 0){
+    if (strcmp(argv0, "pwd") == 0)
+    {
         getcwd(cwd, sizeof(cwd));
         printf("%s\n", cwd);
         retVal = true;

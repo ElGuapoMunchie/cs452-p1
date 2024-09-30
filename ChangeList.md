@@ -1,5 +1,14 @@
 # Changelist
 
+> 9/30/2024
+RECENT EVENTS:
+- Task 7 is passing? --> need to fix what happens when you hit space or enter into cmdline
+
+TODO:
+- See above and fix.
+- Start next task.
+
+
 > 9/28/24
 RECENT EVENTS:
 - I need to find a way to free the memory stored from keeping a history list. I wonder if there's a way to clear it.

@@ -6,6 +6,7 @@
 #include "stdbool.h"
 #include "readline/history.h"
 #include "readline/readline.h"
+#include "sys/types.h"
 #include "sys/wait.h"
 
 int main(int argc, char **argv)
@@ -61,6 +62,8 @@ int main(int argc, char **argv)
     /* Trim Whitespace */
     line = trim_white(line);
 
+    printf("User Entered: '%s'\n", line);
+
     /* Parse the CommandLine */
     lineRetPointer = cmd_parse(line);
     linePointer = *(&lineRetPointer);
@@ -69,12 +72,13 @@ int main(int argc, char **argv)
     validCommand = do_builtin(&myShell, linePointer);
     if (validCommand == false)
     {
-
       pid_t child_pid;
-      pid_t wait_val;
+      pid_t parent_pid;
+
       int retWaitVal;
 
       child_pid = fork();
+      parent_pid = getppid();
 
       if (child_pid < 0)
       {
@@ -87,7 +91,7 @@ int main(int argc, char **argv)
       {
         // This is the child process
         int didItExecute = 0;
-        didItExecute = execvp(linePointer[0], linePointer[1]);
+        didItExecute = execvp(linePointer[0], linePointer);
 
         if (didItExecute == -1)
         {
@@ -101,21 +105,9 @@ int main(int argc, char **argv)
       else
       {
         // This is the parent process
-        pid_t parent_pid = get_ppid(child_pid);
         int status;
-
         waitpid(-1, &status, 0);
-        
-
       }
-
-      // printf("\'%s\' is not a valid command.\n", linePointer[0]);
-
-      // // Error and Abort
-      // cmd_free(linePointer);
-      // free(line);
-      // sh_destroy(&myShell);
-      // exit(-1);
     }
 
     /* Free the line */
