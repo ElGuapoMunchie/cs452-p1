@@ -54,12 +54,9 @@ char *get_prompt(const char *env)
 
 void sh_init(struct shell *sh)
 {
-    /* Allocate Shell Memory --> DON"T NEED TO DO THIS*/
-    // sh = (struct shell *)malloc(sizeof(struct shell));
-
     /* Initialize the shell with starter variables */
     sh->shell_is_interactive = 1;
-    sh->shell_pgid = 1;
+    sh->shell_pgid = 1; // Process id
     sh->shell_tmodes.c_iflag = 0; // TODO: Does this need to be set? Set all off??
     sh->shell_terminal = 1;
     sh->prompt = NULL;
@@ -232,7 +229,23 @@ char *trim_white(char *line)
     }
 
     *q = '\0';         // Null terminate the modified string
-    return normalized; // Return the modified string
+
+// Copy dup string to original, free dup
+    strcpy(line, normalized);
+
+    int i = 0;
+    char c = line[i];
+    while (c != '\0'){
+        c = line[i];
+        i++;
+    }
+    while (i < strlen(line)){
+        line[i] = '\0';
+    }
+
+    free(normalized);
+
+    return line; // Return the modified string
 }
 
 /**

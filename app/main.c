@@ -6,6 +6,7 @@
 #include "stdbool.h"
 #include "readline/history.h"
 #include "readline/readline.h"
+#include "sys/wait.h"
 
 int main(int argc, char **argv)
 {
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
     add_history(line);
 
     /* Trim Whitespace */
-    // line = trim_white(line);
+    line = trim_white(line);
 
     /* Parse the CommandLine */
     lineRetPointer = cmd_parse(line);
@@ -66,9 +67,49 @@ int main(int argc, char **argv)
 
     /* Handle Args */
     validCommand = do_builtin(&myShell, linePointer);
-    if (validCommand == false){
+    if (validCommand == false)
+    {
 
-      printf("\'%s\' is not a valid command.\n", linePointer[0]);
+      pid_t child_pid;
+      pid_t wait_val;
+      int retWaitVal;
+
+      child_pid = fork();
+
+      if (child_pid < 0)
+      {
+        fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
+        cmd_free(linePointer);
+        sh_destroy(&myShell);
+        return (-1);
+      }
+      else if (child_pid == 0)
+      {
+        // This is the child process
+        int didItExecute = 0;
+        didItExecute = execvp(linePointer[0], linePointer[1]);
+
+        if (didItExecute == -1)
+        {
+          // It failed
+          fprintf(stderr, "\'%s\' command does not exist.\n", linePointer[0]);
+          cmd_free(linePointer);
+          sh_destroy(&myShell);
+          return (-1);
+        }
+      }
+      else
+      {
+        // This is the parent process
+        pid_t parent_pid = get_ppid(child_pid);
+        int status;
+
+        waitpid(-1, &status, 0);
+        
+
+      }
+
+      // printf("\'%s\' is not a valid command.\n", linePointer[0]);
 
       // // Error and Abort
       // cmd_free(linePointer);
