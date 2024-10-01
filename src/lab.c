@@ -65,7 +65,7 @@ void sh_init(struct shell *sh)
             kill(-sh->shell_pgid, SIGTTIN);
 
         /* Ignore interactive and job-control signals.  */
-        signal(SIGINT, SIG_IGN);
+        signal(SIGINT,  SIG_IGN);
         signal(SIGQUIT, SIG_IGN);
         signal(SIGTSTP, SIG_IGN);
         signal(SIGTTIN, SIG_IGN);
@@ -144,6 +144,9 @@ int change_dir(char **dir)
  */
 char **cmd_parse(char const *line)
 {
+
+    // TODO: If line is NULL, do nothing somehow.
+
     /*
     NOTE: FIRST element of args will be the COMMAND.
           FINAL element of args will be the NULL POINTER.

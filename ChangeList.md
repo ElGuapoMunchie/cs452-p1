@@ -2,6 +2,7 @@
 
 > 9/30/2024
 RECENT EVENTS:
+- I think Task 8 is done. I have no idea though. Gonna start 9.
 - Task 7 is passing? --> need to fix what happens when you hit space or enter into cmdline
 
 TODO:

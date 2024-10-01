@@ -8,6 +8,7 @@
 #include "readline/readline.h"
 #include "sys/types.h"
 #include "sys/wait.h"
+#include <signal.h>
 
 int main(int argc, char **argv)
 {
@@ -91,6 +92,15 @@ int main(int argc, char **argv)
       {
         // This is the child process
         int didItExecute = 0;
+
+        setpgid(child_pid, child_pid);
+        tcsetpgrp(myShell.shell_terminal, child_pid);
+        signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+
         didItExecute = execvp(linePointer[0], linePointer);
 
         if (didItExecute == -1)
