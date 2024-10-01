@@ -16,11 +16,11 @@ int main(int argc, char **argv)
   char *line;
   char **linePointer;
   char **lineRetPointer;
-  // char *retValPointer;
-  // int errorNumber;
   bool validCommand;
   struct shell myShell;
   int c;
+  int process_counter = 0;
+  bool ambFlag;
 
   while ((c = getopt(argc, argv, "v")) != -1)
     switch (c)
@@ -63,46 +63,66 @@ int main(int argc, char **argv)
     /* Trim Whitespace */
     line = trim_white(line);
 
-    printf("User Entered: '%s'\n", line);
-
     /* Parse the CommandLine */
     lineRetPointer = cmd_parse(line);
     linePointer = *(&lineRetPointer);
 
-    /* Handle Args */
-    validCommand = do_builtin(&myShell, linePointer);
-    if (validCommand == false)
+    // Walk through string array to find last valid string
+    int idx = 0;
+    while(linePointer[idx] != NULL){
+      idx++;
+    }
+    idx--;
+
+    // Check for '&' symbol as final arg
+    if(strchr(linePointer[idx], '&') != NULL){
+      ambFlag = true;
+    } else {
+      ambFlag = false;
+    }
+
+    // Split Child
+    pid_t child_pid;
+    pid_t parent_pid;
+    int retWaitVal;
+
+    child_pid = fork();
+    parent_pid = getppid();
+
+    // Check & and [print counter, pid, and cmd] if needed.
+    if (ambFlag) {
+      /* 
+      Print: id, pid, cmd
+      */
+
+     printf("[%d] %d %s\n", process_counter, child_pid, *linePointer);
+    }
+
+    if (child_pid < 0)
     {
-      pid_t child_pid;
-      pid_t parent_pid;
+      fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
+      cmd_free(linePointer);
+      sh_destroy(&myShell);
+      return (-1);
+    }
+    else if (child_pid == 0)
+    {
+      // This is the child process
+      int didItExecute = 0;
 
-      int retWaitVal;
+      setpgid(child_pid, child_pid);
+      tcsetpgrp(myShell.shell_terminal, child_pid);
+      signal(SIGINT, SIG_DFL);
+      signal(SIGQUIT, SIG_DFL);
+      signal(SIGTSTP, SIG_DFL);
+      signal(SIGTTIN, SIG_DFL);
+      signal(SIGTTOU, SIG_DFL);
 
-      child_pid = fork();
-      parent_pid = getppid();
+      validCommand = do_builtin(&myShell, linePointer);
 
-      if (child_pid < 0)
+      if (!validCommand) // Is it a builtIn Command? NO -> check cmd files
       {
-        fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
-        cmd_free(linePointer);
-        sh_destroy(&myShell);
-        return (-1);
-      }
-      else if (child_pid == 0)
-      {
-        // This is the child process
-        int didItExecute = 0;
-
-        setpgid(child_pid, child_pid);
-        tcsetpgrp(myShell.shell_terminal, child_pid);
-        signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_DFL);
-        signal(SIGTSTP, SIG_DFL);
-        signal(SIGTTIN, SIG_DFL);
-        signal(SIGTTOU, SIG_DFL);
-
         didItExecute = execvp(linePointer[0], linePointer);
-
         if (didItExecute == -1)
         {
           // It failed
@@ -112,11 +132,16 @@ int main(int argc, char **argv)
           return (-1);
         }
       }
-      else
+    }
+    else
+    {
+      // This is the parent process
+      int status;
+
+      if (!ambFlag) // No flag = run in "foreground", wait for child
       {
-        // This is the parent process
-        int status;
         waitpid(-1, &status, 0);
+        
       }
     }
 
