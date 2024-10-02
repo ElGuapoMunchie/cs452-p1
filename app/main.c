@@ -67,86 +67,112 @@ int main(int argc, char **argv)
     lineRetPointer = cmd_parse(line);
     linePointer = *(&lineRetPointer);
 
-    // Walk through string array to find last valid string
-    int idx = 0;
-    while(linePointer[idx] != NULL){
-      idx++;
-    }
-    idx--;
+    
 
-    // Check for '&' symbol as final arg
-    if(strchr(linePointer[idx], '&') != NULL){
-      ambFlag = true;
-    } else {
-      ambFlag = false;
-    }
-
-    // Split Child
-    pid_t child_pid;
-    pid_t parent_pid;
-    int retWaitVal;
-
-    child_pid = fork();
-    parent_pid = getppid();
-
-    // Check & and [print counter, pid, and cmd] if needed.
-    if (ambFlag) {
-      /* 
-      Print: id, pid, cmd
-      */
-
-     printf("[%d] %d %s\n", process_counter, child_pid, *linePointer);
-    }
-
-    if (child_pid < 0)
-    {
-      fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
-      cmd_free(linePointer);
-      sh_destroy(&myShell);
-      return (-1);
-    }
-    else if (child_pid == 0)
-    {
-      // This is the child process
-      int didItExecute = 0;
-
-      setpgid(child_pid, child_pid);
-      tcsetpgrp(myShell.shell_terminal, child_pid);
-      signal(SIGINT, SIG_DFL);
-      signal(SIGQUIT, SIG_DFL);
-      signal(SIGTSTP, SIG_DFL);
-      signal(SIGTTIN, SIG_DFL);
-      signal(SIGTTOU, SIG_DFL);
-
-      validCommand = do_builtin(&myShell, linePointer);
-
-      if (!validCommand) // Is it a builtIn Command? NO -> check cmd files
-      {
-        didItExecute = execvp(linePointer[0], linePointer);
-        if (didItExecute == -1)
-        {
-          // It failed
-          fprintf(stderr, "\'%s\' command does not exist.\n", linePointer[0]);
-          cmd_free(linePointer);
-          sh_destroy(&myShell);
-          return (-1);
-        }
-      }
-    }
-    else
-    {
-      // This is the parent process
-      int status;
-
-      if (!ambFlag) // No flag = run in "foreground", wait for child
-      {
-        waitpid(-1, &status, 0);
-        
-      }
-    }
 
     /* Free the line */
     cmd_free(linePointer);
+
+    //=====================================================================================================
+    //       Unable to implement-- used for Task 9+
+    //=====================================================================================================
+    //  Note - if you uncomment this, move the cmd_free(linePointer) above to below this code,
+    //         and comment out the above stuff (also located between '===')
+    //=====================================================================================================
+    // /* Search for & */
+    // // Walk through string array to find last valid string
+    // int idx = 0;
+    // while (linePointer[idx] != NULL)
+    // {
+    //   idx++;
+    // }
+    // idx--;
+
+    // // Check for '&' symbol as final arg
+    // char *stringWAmbs = strchr(linePointer[idx], '&');
+    // if (stringWAmbs != NULL)
+    // {
+    //   for (int j = 0; j < strlen(stringWAmbs) - 1; j++)
+    //   {
+    //     if (stringWAmbs[j] == '&')
+    //     {
+    //       stringWAmbs[j] = '\0';
+    //       break;
+    //     }
+    //   }
+    //   ambFlag = true;
+    // }
+    // else
+    // {
+    //   ambFlag = false;
+    // }
+
+    // // Split Child
+    // pid_t pid;
+    // pid_t parent_pid;
+    // int retWaitVal;
+
+    // pid = fork();
+    // parent_pid = getppid();
+
+    // // Check & and [print counter, pid, and cmd] if needed.
+    // if (ambFlag)
+    // {
+    //   printf("[%d] %d %s\n", process_counter, getpid(), *linePointer);
+    //   process_counter++;
+    // }
+
+    // if (pid < 0) // fork FAILED
+    // {
+    //   fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
+    //   cmd_free(linePointer);
+    //   sh_destroy(&myShell);
+    //   return (-1);
+    // }
+    // else if (pid == 0) // CHILD process
+    // {
+    //   int didItExecute = 0;
+
+    //   pid_t child = getpid();
+    //   setpgid(child, child);
+    //   tcsetpgrp(myShell.shell_terminal, child);
+    //   signal(SIGINT, SIG_DFL);
+    //   signal(SIGQUIT, SIG_DFL);
+    //   signal(SIGTSTP, SIG_DFL);
+    //   signal(SIGTTIN, SIG_DFL);
+    //   signal(SIGTTOU, SIG_DFL);
+
+    //   validCommand = do_builtin(&myShell, linePointer);
+
+    //   if (!validCommand) // Is it a builtIn Command? NO -> check cmd files
+    //   {
+    //     didItExecute = execvp(linePointer[0], linePointer);
+    //     if (didItExecute == -1)
+    //     {
+    //       // It failed
+    //       fprintf(stderr, "\'%s\' command does not exist.\n", linePointer[0]);
+    //       cmd_free(linePointer);
+    //       sh_destroy(&myShell);
+    //       return (-1);
+    //     }
+    //     return 0; // Kill the child process? YES
+    //   }
+    // }
+    // else // PARENT PROCESS ========================================
+    // {
+    //   int status = 0;
+
+    //   if (!ambFlag) // If no flag, wait for child
+    //   {
+    //     waitpid(pid, &status, 0);                     // Set status of output of child process (if it finished)
+    //     tcsetpgrp(myShell.shell_terminal, getpgrp()); // Reclaim terminal control
+    //   }
+    //   else
+    //   {
+    //     pid_t result;
+    //     result = waitpid(pid, &status, WNOHANG); // Else periodically check on child
+    //   }
+    // }
   }
 
   /* Free All Items and Data */
