@@ -16,7 +16,7 @@ a process using `ls -l -a`.
 
 This project was ***brutal***. Over the past 2 weeks, I have spent well over 61 
 hours on this project (as documented by the codespace), in which I struggled
-through the first 7 tasks, and then faltered with the 8th task and beyond.
+through the first 7 tasks, and then faltered with the 9th task and beyond.
 Although I had a very basic knowledge of C, and had completely forgotten how 
 to allocate and deallocate memory, I found that after the first week, things 
 had started to progress a little more smoothly.
