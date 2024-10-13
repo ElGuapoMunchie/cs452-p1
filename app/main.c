@@ -1,183 +1,230 @@
+/*
+Class:   CS 452 - Operating Systems
+Project: P2 (aka P6) Bounded Buffer
+Author:  Mark Muench
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <pthread.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <time.h>
+#include <sys/time.h> /* for gettimeofday system call */
 #include "../src/lab.h"
-#include "stdbool.h"
-#include "readline/history.h"
-#include "readline/readline.h"
-#include "sys/types.h"
-#include "sys/wait.h"
-#include <signal.h>
 
-int main(int argc, char **argv)
+#define UNUSED(x) (void)x
+#define MAX_C 8           /* Maximum number of consumer threads */
+#define MAX_P 8           /* Maximum number of producer threads */
+#define MAX_SLEEP 1000000 /* maximum time a thread can sleep in nanoseconds*/
+
+static bool delay = false;
+
+double getMilliSeconds()
 {
-  char *prompt;
-  char *line;
-  char **linePointer;
-  char **lineRetPointer;
-  bool validCommand;
-  struct shell myShell;
-  int c;
-  int process_counter = 0;
-  bool ambFlag;
+     struct timeval now;
+     gettimeofday(&now, (struct timezone *)0);
+     return (double)now.tv_sec * 1000.0 + now.tv_usec / 1000.0;
+}
 
-  while ((c = getopt(argc, argv, "v")) != -1)
-    switch (c)
-    {
-    // Print version
-    case 'v':
-      printf("OS Version: %d.%d\n", lab_VERSION_MAJOR, lab_VERSION_MINOR);
-      break;
-    case '?':
-      if (optopt == 'c')
-        fprintf(stderr, "Option -%c requires an argument.\n", optopt);
-      else if (isprint(optopt))
-        fprintf(stderr, "Unknown option `-%c'.\n", optopt);
-      else
-        fprintf(stderr,
-                "Unknown option character `\\x%x'.\n",
-                optopt);
-      return 1;
-    default:
-      abort();
-      break;
-    }
+/*Track the total items produced and consumed*/
+static struct
+{
+     unsigned int num;
+     pthread_mutex_t lock;
+} numproduced = {0, PTHREAD_MUTEX_INITIALIZER},
+  numconsumed = {0, PTHREAD_MUTEX_INITIALIZER};
 
-  /* Implement Custom Prompt Here */
+/*Shared queue that producers and consumers will access*/
+static queue_t pc_queue;
 
-  sh_init(&myShell);
-  prompt = get_prompt("MY_PROMPT");
-  myShell.prompt = prompt;
+/**
+ * Produces items at a random interval. Exits once it has produced
+ * the correct number of items.
+ */
+static void *producer(void *args)
+{
 
-  /* Now begin user process to handle user input */
-  using_history();
-  while ((line = readline("$")))
-  {
-    /* Print the line */
-    printf("%s\n", line);
+     int num = *((int *)args);
+     //pthread_t tid = pthread_self();
+     unsigned int seedp = 0;
+     struct timespec s = {0, 0};
+     int *itm = NULL;
 
-    /* Add to the history */
-    add_history(line);
+     // fprintf(stderr, "Producer thread: %ld - producing %d items\n", tid, num);
+     for (int i = 0; i < num; i++)
+     {
+          if (delay)
+          {
+               /*simulate producing the item*/
+               s.tv_nsec = (rand_r(&seedp) % MAX_SLEEP);
+               nanosleep(&s, NULL);
+          }
 
-    /* Trim Whitespace */
-    line = trim_white(line);
+          itm = (int *)malloc(sizeof(int));
+          *itm = i;
+          // Put the item into the queue
+          enqueue(pc_queue, itm);
 
-    /* Parse the CommandLine */
-    lineRetPointer = cmd_parse(line);
-    linePointer = *(&lineRetPointer);
+          // Update counters for testing purposes
+          pthread_mutex_lock(&numproduced.lock);
+          numproduced.num++;
+          pthread_mutex_unlock(&numproduced.lock);
+     }
+     // fprintf(stderr, "Producer thread: %ld - Done producing!\n", tid);
+     pthread_exit(NULL);
+}
 
-    
+/**
+ * Consumes items.
+ */
+static void *consumer(void *args)
+{
+     UNUSED(args);
+     //pthread_t tid = pthread_self();
+     unsigned int seedp = 0;
+     struct timespec s = {0, 0};
+     int *itm = NULL;
+     // fprintf(stderr, "Consumer thread: %ld\n", tid);
 
+     while (true)
+     {
+          if (delay)
+          {
+               /*simulate producing the item*/
+               s.tv_nsec = (rand_r(&seedp) % MAX_SLEEP);
+               nanosleep(&s, NULL);
+          }
 
-    /* Free the line */
-    cmd_free(linePointer);
+          itm = (int *)dequeue(pc_queue);
+          if (itm)
+          {
+               free(itm);
+               itm = NULL;
+               // Update counters for testing purposes
+               pthread_mutex_lock(&numconsumed.lock);
+               numconsumed.num++;
+               pthread_mutex_unlock(&numconsumed.lock);
+          }
+          else
+          {
+               // If the queue is implemented correctly we should not
+               // get a NULL item during normal operation. It is possible to
+               // get a NULL item AFTER shutdown has been called which is fine
+               // because we are just cleaning up all the items.
+               if (!is_shutdown(pc_queue))
+               {
+                    fprintf(stderr, "ERROR: Got a null item when queue was not shutdown!\n");
+               }
+               break;
+          }
+     }
+     // fprintf(stderr, "Consumer Thread: %ld - Done consuming!\n", tid);
+     pthread_exit(NULL);
+}
 
-    //=====================================================================================================
-    //       Unable to implement-- used for Task 9+
-    //=====================================================================================================
-    //  Note - if you uncomment this, move the cmd_free(linePointer) above to below this code,
-    //         and comment out the above stuff (also located between '===')
-    //=====================================================================================================
-    // /* Search for & */
-    // // Walk through string array to find last valid string
-    // int idx = 0;
-    // while (linePointer[idx] != NULL)
-    // {
-    //   idx++;
-    // }
-    // idx--;
+static void usage(char *n)
+{
+     fprintf(stderr, "Usage: %s [-c num consumer] [-p num producer] [-i num items] [-s queue size] <-d introduce delay>\n", n);
+     fprintf(stderr, "-d will introduce a random delay between consumer and producer");
+     exit(EXIT_FAILURE);
+}
 
-    // // Check for '&' symbol as final arg
-    // char *stringWAmbs = strchr(linePointer[idx], '&');
-    // if (stringWAmbs != NULL)
-    // {
-    //   for (int j = 0; j < strlen(stringWAmbs) - 1; j++)
-    //   {
-    //     if (stringWAmbs[j] == '&')
-    //     {
-    //       stringWAmbs[j] = '\0';
-    //       break;
-    //     }
-    //   }
-    //   ambFlag = true;
-    // }
-    // else
-    // {
-    //   ambFlag = false;
-    // }
+int main(int argc, char *argv[])
+{
+     int nump = 1;       /*total number of producers*/
+     int numc = 1;       /*total number of consumers*/
+     int numitems = 10;  /*total number of items to produce per thread*/
+     int queue_size = 5; /*The default size of the queue*/
+     int c;
 
-    // // Split Child
-    // pid_t pid;
-    // pid_t parent_pid;
-    // int retWaitVal;
+     pthread_t producers[MAX_P];
+     pthread_t consumers[MAX_C];
 
-    // pid = fork();
-    // parent_pid = getppid();
+     while ((c = getopt(argc, argv, "c:p:i:s:dh")) != -1)
+          switch (c)
+          {
+          case 'c':
+               numc = atoi(optarg);
+               break;
+          case 'p':
+               nump = atoi(optarg);
+               ;
+               break;
+          case 'i':
+               numitems = atoi(optarg);
+               break;
+          case 's':
+               queue_size = atoi(optarg);
+               break;
+          case 'd':
+               delay = true;
+               break;
+          case 'h':
+               usage(argv[0]);
+               break;
+          default: /* ? */
+               usage(argv[0]);
+          }
+     if (numc > MAX_C)
+          numc = MAX_C;
+     if (nump > MAX_P)
+          nump = MAX_P;
 
-    // // Check & and [print counter, pid, and cmd] if needed.
-    // if (ambFlag)
-    // {
-    //   printf("[%d] %d %s\n", process_counter, getpid(), *linePointer);
-    //   process_counter++;
-    // }
+     int per_thread = numitems / nump;
+     fprintf(stderr, "Simulating %d producers %d consumers with %d items per thread and a queue size of %d\n", nump, numc, per_thread, queue_size);
+     // Start our timing
+     double end = 0;
+     double start = getMilliSeconds();
 
-    // if (pid < 0) // fork FAILED
-    // {
-    //   fprintf(stderr, "Error: Forking a process failed. Exiting Program.\n");
-    //   cmd_free(linePointer);
-    //   sh_destroy(&myShell);
-    //   return (-1);
-    // }
-    // else if (pid == 0) // CHILD process
-    // {
-    //   int didItExecute = 0;
+     // Initialize the queue for usage
+     pc_queue = queue_init(queue_size);
+     /*Create the producer threads*/
+     for (int i = 0; i < nump; i++)
+     {
+          pthread_create(&producers[i], NULL, producer, (void *)&per_thread);
+     }
 
-    //   pid_t child = getpid();
-    //   setpgid(child, child);
-    //   tcsetpgrp(myShell.shell_terminal, child);
-    //   signal(SIGINT, SIG_DFL);
-    //   signal(SIGQUIT, SIG_DFL);
-    //   signal(SIGTSTP, SIG_DFL);
-    //   signal(SIGTTIN, SIG_DFL);
-    //   signal(SIGTTOU, SIG_DFL);
+     fprintf(stderr, "Creating %d consumer threads\n", numc);
+     /*Create the consumer threads*/
+     for (int i = 0; i < numc; i++)
+     {
+          pthread_create(&consumers[i], NULL, consumer, (void *)NULL);
+     }
 
-    //   validCommand = do_builtin(&myShell, linePointer);
+     /*Wait for all the the producer threads to finish*/
+     for (int i = 0; i < nump; i++)
+     {
+          pthread_join(producers[i], NULL);
+     }
 
-    //   if (!validCommand) // Is it a builtIn Command? NO -> check cmd files
-    //   {
-    //     didItExecute = execvp(linePointer[0], linePointer);
-    //     if (didItExecute == -1)
-    //     {
-    //       // It failed
-    //       fprintf(stderr, "\'%s\' command does not exist.\n", linePointer[0]);
-    //       cmd_free(linePointer);
-    //       sh_destroy(&myShell);
-    //       return (-1);
-    //     }
-    //     return 0; // Kill the child process? YES
-    //   }
-    // }
-    // else // PARENT PROCESS ========================================
-    // {
-    //   int status = 0;
+     // Once all the producers are finished we set a flag so the consumer thread can finish up
+     // Once shutdown is called your queue should drain all remaining items and be read for
+     // destruction!
+     queue_shutdown(pc_queue);
 
-    //   if (!ambFlag) // If no flag, wait for child
-    //   {
-    //     waitpid(pid, &status, 0);                     // Set status of output of child process (if it finished)
-    //     tcsetpgrp(myShell.shell_terminal, getpgrp()); // Reclaim terminal control
-    //   }
-    //   else
-    //   {
-    //     pid_t result;
-    //     result = waitpid(pid, &status, WNOHANG); // Else periodically check on child
-    //   }
-    // }
-  }
+     /*Wait for all the the consumer threads to finish*/
+     for (int i = 0; i < numc; i++)
+     {
+          pthread_join(consumers[i], NULL);
+     }
 
-  /* Free All Items and Data */
-  cmd_free(linePointer);
-  sh_destroy(&myShell);
+     if (numproduced.num != numconsumed.num)
+     {
+          fprintf(stderr, "ERROR! produced != consumed\n");
+          abort();
+     }
+     fprintf(stderr, "Queue is empty:%s\n", is_empty(pc_queue) ? "true" : "false");
+     fprintf(stderr, "Total produced:%d\n", numproduced.num);
+     fprintf(stderr, "Total consumed:%d\n", numconsumed.num);
 
-  return 0;
+     // Free up all the stuff we allocated
+     queue_destroy(pc_queue);
+
+     // End our timing
+     end = getMilliSeconds();
+     // Print timing to standard out to graph
+     fprintf(stdout, " %f %d \n", end - start, numproduced.num);
+
+     return 0;
 }
