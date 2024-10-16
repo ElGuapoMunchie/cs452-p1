@@ -8,7 +8,13 @@ Author:  Mark Muench
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <stdio.h>
 
+// Global vars
+int tempInt;
+int* retVal;
+
+// Functions
 queue_t queue_init(int capacity)
 {
     queue_t queue;
@@ -22,7 +28,7 @@ queue_t queue_init(int capacity)
 
     // Malloc array for pointers (Note: this is a pointer array,
     //                          each idx will point to itm stored)
-    queue->array = (int **)malloc(capacity * ssizeof(int *));
+    queue->array = (int **)malloc(capacity * sizeof(int *));
 
     return queue;
 }
@@ -50,17 +56,21 @@ void enqueue(queue_t q, void *data)
 
 void *dequeue(queue_t q)
 {
-
-    // Return if queue is empty
+    // Return NULL if queue is empty
     if (q->currSize == 0)
     {
-        return;
+        return NULL; // TODO: Throw error message if empty? Or return nothing?
     }
+ 
+    // Grab value at head
+    tempInt = q->head;
+    retVal = q->array[tempInt];
+    tempInt++;
 
-    Node *retVal = &q->node; // Grab current node address
-    q->node = *q->node.next; // Set currNode to nextNode
-    q->currSize--;           // Decrement number of items in queue
+    // Update head
+    q->head = tempInt;
 
+    q->currSize--;           
     return retVal; // Return item at address
 }
 

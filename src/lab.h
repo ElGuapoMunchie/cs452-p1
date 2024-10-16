@@ -23,7 +23,7 @@ extern "C"
     int capacity;  // Capacity of queue
     int currSize;  // Current Size
     bool shutdown; // Flag to shutdown. If flag is set, only consumers can access queue.
-    void** array;  // Array of pointers to data stored in the queue
+    int** array;   // Array of pointers to data stored in the queue
     int head;      // int used to access head of items in queue
     int tail;      // int used to access tail of items in queue
   } *queue_t;
