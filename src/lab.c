@@ -35,6 +35,7 @@ queue_t queue_init(int capacity)
 
 void queue_destroy(queue_t q)
 {
+    // Check if array is NULL. If !NULL, free memory inside
     if (q->array != NULL)
     {
         for (int i = 0; i < q->currSize; i++)
@@ -49,7 +50,25 @@ void queue_destroy(queue_t q)
 
 void enqueue(queue_t q, void *data)
 {
-    printf("%p\n", data);
+    // Check if data is NULL --> Fail
+    if (data == NULL){
+        fprintf(stderr, "Data being placed in queue is NULL\n");
+        exit(-1);
+    }
+
+    // Check if at MAX CAPACITY
+    if (q->currSize == q->capacity){
+        /*
+        So uh... do I need to have whatever process is doing this wait 
+        until the queue is decrimented?
+
+        Pensive -_-
+        */
+
+       // TODO -- REMOVE ME
+       printf("Queue is full. Please remove items from queue.\n");
+       return;
+    }
 
     q->currSize++; // Incremement number of items in queue
 }
