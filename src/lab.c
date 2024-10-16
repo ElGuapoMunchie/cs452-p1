@@ -22,7 +22,7 @@ queue_t queue_init(int capacity)
 
     // Malloc array for pointers (Note: this is a pointer array,
     //                          each idx will point to itm stored)
-    queue->array = (int **)malloc(capacity * sizeof(int *));
+    queue->array = (int **)malloc(capacity * ssizeof(int *));
 
     return queue;
 }
