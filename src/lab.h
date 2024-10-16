@@ -80,6 +80,12 @@ extern "C"
    */
   bool is_shutdown(queue_t q);
 
+  /*
+   * @brief Prints queue contents
+   * @param q The queue
+   */
+  void print_queue(queue_t q);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

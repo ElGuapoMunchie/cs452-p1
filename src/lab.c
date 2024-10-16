@@ -12,12 +12,20 @@ Author:  Mark Muench
 
 // Global vars
 int tempInt;
-int* retVal;
+int *retVal;
 
 // Functions
 queue_t queue_init(int capacity)
 {
-    queue_t queue;
+    // Allocate memory for the queue
+    queue_t queue = (queue_t)malloc(sizeof(struct queue));
+
+    // Check if malloc succeeded
+    if (queue == NULL)
+    {
+        fprintf(stderr, "Failed to allocate memory for queue\n");
+        return NULL;
+    }
 
     // Initialize queue struct vals
     queue->capacity = capacity;
@@ -51,25 +59,32 @@ void queue_destroy(queue_t q)
 void enqueue(queue_t q, void *data)
 {
     // Check if data is NULL --> Fail
-    if (data == NULL){
+    if (data == NULL)
+    {
         fprintf(stderr, "Data being placed in queue is NULL\n");
         exit(-1);
     }
 
-    // Check if at MAX CAPACITY
-    if (q->currSize == q->capacity){
-        /*
-        So uh... do I need to have whatever process is doing this wait 
-        until the queue is decrimented?
-
-        Pensive -_-
-        */
-
-       // TODO -- REMOVE ME
-       printf("Queue is full. Please remove items from queue.\n");
-       return;
+    // Check if shutdown flagged --> Not allowed to add anything
+    if (q->shutdown == true){
+        return;
     }
 
+    // Check if at MAX CAPACITY
+    if (q->currSize == q->capacity)
+    {
+        /*
+        So uh... do I need to have whatever process is doing this wait
+        until the queue is decrimented?
+        */
+
+        // TODO -- REMOVE ME
+        printf("Queue is full. Please remove items from queue.\n");
+        return;
+    }
+
+    q->array[q->head] = data; // Update pointer to referenced data
+    q->head++;
     q->currSize++; // Incremement number of items in queue
 }
 
@@ -80,7 +95,7 @@ void *dequeue(queue_t q)
     {
         return NULL; // TODO: Throw error message if empty? Or return nothing?
     }
- 
+
     // Grab value at head
     tempInt = q->head;
     retVal = q->array[tempInt];
@@ -89,7 +104,7 @@ void *dequeue(queue_t q)
     // Update head
     q->head = tempInt;
 
-    q->currSize--;           
+    q->currSize--;
     return retVal; // Return item at address
 }
 
@@ -113,4 +128,14 @@ bool is_empty(queue_t q)
 bool is_shutdown(queue_t q)
 {
     return q->shutdown;
+}
+
+void print_queue(queue_t q){
+    if (q->capacity == 0){
+        printf("Queue is EMPTY.\n");
+    }
+    printf("Printing queue contents:\nCapacity:%d\nCurrSize:%d\n\n", q->capacity, q->currSize);
+    for (int i = 0; i < q->currSize; i++){
+        printf("\t%p\n", q->array[q->head]); // TODO: Figure out how to dereference object
+    }
 }

@@ -18,9 +18,6 @@ void tearDown(void) {
   // clean stuff up here
 }
 
-
-
-
 void test_create_destroy(void)
 {
     queue_t q = queue_init(10);
@@ -34,6 +31,7 @@ void test_queue_dequeue(void)
     TEST_ASSERT_TRUE(q != NULL);
     int data = 1;
     enqueue(q, &data);
+    print_queue(q);
     TEST_ASSERT_TRUE(dequeue(q) == &data);
     queue_destroy(q);
 }
@@ -76,7 +74,7 @@ void test_queue_dequeue_shutdown(void)
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_create_destroy);
-  // RUN_TEST(test_queue_dequeue);
+  RUN_TEST(test_queue_dequeue);
   // RUN_TEST(test_queue_dequeue_multiple);
   // RUN_TEST(test_queue_dequeue_shutdown);
   return UNITY_END();
