@@ -92,6 +92,8 @@ void enqueue(queue_t q, void *data)
         pthread_cond_wait(&not_full, &mutex);
     }
 
+
+    // TODO: Check case for when your head reaches the size of the queue. 
     q->array[q->head] = data; // Update pointer to referenced data
     q->head++;
     q->currSize++; // Incremement number of items in queue
