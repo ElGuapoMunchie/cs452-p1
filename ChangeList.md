@@ -1,8 +1,8 @@
 # Changelist
-> 10/15/2024
 
-Check out this [link](https://www2.it.uu.se/education/course/homepage/os/vt20/module-4/bounded-buffer/#:~:text=The%20bounded%2Dbuffer%20problems%20(aka,read%20data%20from%20the%20buffer)
-which explains the bounded-buffer-problem in depth. 
+>10/17/2024
+AHHHHHHHHHH
+Maybe the Mutex isn't locking properly? How tf do I find the HBO?
 
 > 10/17/2024
 Good news first- I'm passing all the tests. I've got a bunch of memory leaks coming
@@ -13,6 +13,11 @@ Just another day at the office.
 And the bad news?
 
 I'm getting sick of minecraft music.
+
+> 10/15/2024
+
+Check out this [link](https://www2.it.uu.se/education/course/homepage/os/vt20/module-4/bounded-buffer/#:~:text=The%20bounded%2Dbuffer%20problems%20(aka,read%20data%20from%20the%20buffer)
+which explains the bounded-buffer-problem in depth. 
 
 > 10/12/2024
 

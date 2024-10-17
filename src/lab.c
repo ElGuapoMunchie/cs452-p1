@@ -65,8 +65,12 @@ void queue_destroy(queue_t q)
 
 void enqueue(queue_t q, void *data)
 {
+    printf("Enqueue: %d\n", *(int *)data);
+
     // Lock mutex
     pthread_mutex_lock(&mutex);
+
+    // TODO: Check if mutex lock is actually working. Check for retval, maybe change parameter??
 
     // Check if data is NULL --> Fail
     if (data == NULL)
@@ -88,22 +92,6 @@ void enqueue(queue_t q, void *data)
         pthread_cond_wait(&not_full, &mutex);
     }
 
-    // if (q->currSize == q->capacity)
-    // {
-    //     /*
-    //     So uh... do I need to have whatever process is doing this wait
-    //     until the queue is decrimented?
-    //     */
-
-    //     // TODO -- REMOVE ME
-    //     printf("Queue is full. Please remove items from queue.\n");
-
-    //     print_queue(q);
-
-    //     printf("\tExiting Program (0)\n");
-    //     exit(0);
-    // }
-
     q->array[q->head] = data; // Update pointer to referenced data
     q->head++;
     q->currSize++; // Incremement number of items in queue
@@ -117,6 +105,7 @@ void *dequeue(queue_t q)
 {
     // Lock mutex
     pthread_mutex_lock(&mutex);
+
 
     // Wait till queue has an element in it
     while (q->currSize == 0)
@@ -137,6 +126,7 @@ void *dequeue(queue_t q)
     pthread_cond_signal(&not_full);
     pthread_mutex_unlock(&mutex);
 
+    printf("Dequeue: %d\n", *retVal);
     return retVal; // Return item at address
 }
 
