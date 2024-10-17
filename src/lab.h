@@ -26,6 +26,9 @@ extern "C"
     int** array;   // Array of pointers to data stored in the queue
     int head;      // int used to access head of items in queue
     int tail;      // int used to access tail of items in queue
+
+    // TODO: **Gonna try to do with with global mutex in lab.c first**
+    // pthread_mutex_t lock; // Mutex used to maintain synchronization during enqueue, dequeue
   } *queue_t;
 
   /**

@@ -10,11 +10,14 @@ Author:  Mark Muench
 #include <pthread.h>
 #include <stdio.h>
 
-// Global vars
+/* Global vars */
 int tempInt;
 int *retVal;
+pthread_mutex_t mutex;
+pthread_cond_t not_full;  // Condition variable to signal not full
+pthread_cond_t not_empty; // Condition variable to signal not empty
 
-// Functions
+/* Functions */
 queue_t queue_init(int capacity)
 {
     // Allocate memory for the queue
@@ -38,6 +41,9 @@ queue_t queue_init(int capacity)
     //                          each idx will point to itm stored)
     queue->array = (int **)malloc(capacity * sizeof(int *));
 
+    // Initialize mutex for synchronization
+    pthread_mutex_init(&mutex, NULL);
+
     return queue;
 }
 
@@ -54,10 +60,14 @@ void queue_destroy(queue_t q)
         // Nullify the pointer (good practice)
         q->array = NULL;
     }
+    pthread_mutex_destroy(&mutex);
 }
 
 void enqueue(queue_t q, void *data)
 {
+    // Lock mutex
+    pthread_mutex_lock(&mutex);
+
     // Check if data is NULL --> Fail
     if (data == NULL)
     {
@@ -66,45 +76,67 @@ void enqueue(queue_t q, void *data)
     }
 
     // Check if shutdown flagged --> Not allowed to add anything
-    if (q->shutdown == true){
-        return;
-    }
-
-    // Check if at MAX CAPACITY
-    if (q->currSize == q->capacity)
+    if (q->shutdown == true)
     {
-        /*
-        So uh... do I need to have whatever process is doing this wait
-        until the queue is decrimented?
-        */
-
-        // TODO -- REMOVE ME
-        printf("Queue is full. Please remove items from queue.\n");
         return;
     }
+
+    // Check if at MAX CAPACITY --> attempt to lock mutex
+    while (q->currSize == q->capacity)
+    {
+        // Wait for the capacity to be reduced, try to lock if possible
+        pthread_cond_wait(&not_full, &mutex);
+    }
+
+    // if (q->currSize == q->capacity)
+    // {
+    //     /*
+    //     So uh... do I need to have whatever process is doing this wait
+    //     until the queue is decrimented?
+    //     */
+
+    //     // TODO -- REMOVE ME
+    //     printf("Queue is full. Please remove items from queue.\n");
+
+    //     print_queue(q);
+
+    //     printf("\tExiting Program (0)\n");
+    //     exit(0);
+    // }
 
     q->array[q->head] = data; // Update pointer to referenced data
     q->head++;
     q->currSize++; // Incremement number of items in queue
+
+    // Unlock mutex for critical section
+    pthread_cond_signal(&not_empty);
+    pthread_mutex_unlock(&mutex);
 }
 
 void *dequeue(queue_t q)
 {
-    // Return NULL if queue is empty
-    if (q->currSize == 0)
+    // Lock mutex
+    pthread_mutex_lock(&mutex);
+
+    // Wait till queue has an element in it
+    while (q->currSize == 0)
     {
-        return NULL; // TODO: Throw error message if empty? Or return nothing?
+        pthread_cond_wait(&not_empty, &mutex);
     }
 
-    // Grab value at head
-    tempInt = q->head;
+    // Grab value at tail
+    tempInt = q->tail;
     retVal = q->array[tempInt];
     tempInt++;
 
     // Update head
-    q->head = tempInt;
-
+    q->tail = tempInt;
     q->currSize--;
+
+    // Unlock mutex
+    pthread_cond_signal(&not_full);
+    pthread_mutex_unlock(&mutex);
+
     return retVal; // Return item at address
 }
 
@@ -130,12 +162,16 @@ bool is_shutdown(queue_t q)
     return q->shutdown;
 }
 
-void print_queue(queue_t q){
-    if (q->capacity == 0){
+void print_queue(queue_t q)
+{
+    if (q->capacity == 0)
+    {
         printf("Queue is EMPTY.\n");
     }
-    printf("Printing queue contents:\nCapacity:%d\nCurrSize:%d\n\n", q->capacity, q->currSize);
-    for (int i = 0; i < q->currSize; i++){
-        printf("\t%p\n", q->array[q->head]); // TODO: Figure out how to dereference object
+    printf("Printing queue contents:\nCapacity:%d\nCurrSize:%d\n", q->capacity, q->currSize);
+    for (int i = 0; i < q->currSize; i++)
+    {
+        printf("[%d]", q->tail);
+        printf(" %d\n", *q->array[q->tail]); // TODO: Figure out how to dereference object
     }
 }
