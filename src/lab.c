@@ -79,15 +79,14 @@ void enqueue(queue_t q, void *data)
     // Lock mutex
     int result = pthread_mutex_lock(&mutex);
 
-    if (result == 0)
-    {
-        printf("en-lock successful\n");
-    }
-    else
-    {
-        printf("en-lock failure\n");
-    }
-    // TODO: Check if mutex lock is actually working. Check for retval, maybe change parameter??
+    // if (result == 0)
+    // {
+    //     printf("en-lock successful\n");
+    // }
+    // else
+    // {
+    //     printf("en-lock failure\n");
+    // }
 
     // Check if data is NULL --> Fail
     if (data == NULL)
@@ -128,6 +127,7 @@ void *dequeue(queue_t q)
 {
     // Lock mutex
     int result = pthread_mutex_lock(&mutex);
+
     if (result == 0)
     {
         printf("deq-lock successful\n");
@@ -138,13 +138,12 @@ void *dequeue(queue_t q)
     }
 
     // Check if in shutdown and size is 0 -> Exit and return NULL
-    if (q->shutdown && (q->currSize == 0))
+    if ((q->currSize == 0) && q->shutdown)
     {
         pthread_mutex_unlock(&mutex);
-
-        // TODO: Remove helper code here
-        printf("Queue is being shutdown. Remaining Elements:\n");
-        print_queue(q);
+        // // TODO: Remove helper code here
+        // printf("Queue is being shutdown. Remaining Elements:\n");
+        // print_queue(q);
         return NULL;
     }
 
@@ -182,6 +181,12 @@ void *dequeue(queue_t q)
 
 void queue_shutdown(queue_t q)
 {
+    printf("shutdown called\n");
+    printf("\tcurrSize: %d\n", q->currSize);
+
+    // What if I signal for waits to stop waiting?
+    pthread_cond_signal(&not_empty);
+
     q->shutdown = true;
 }
 

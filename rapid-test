@@ -1,0 +1,29 @@
+#!/bin/bash
+# Author: Mark Muench
+# Date: 10/18/2024
+# Version: 1.0
+# Description:  This file acts as a tester- it will run
+#               multiple instances of main with several
+#               different parameters.
+
+# Note: usage is: ./myprogram <num producers> <num consumer> <numItems> <cacheSize> <delay>
+
+# Start of tester:   
+
+echo "Running Tests...\n"
+echo "Test 1: Default myprog"
+./myprogram
+
+echo "Test 2: 1p, 1c, 10 itm, 5 cache"
+./myprogram 1 1 10 5 
+
+echo "Test 3: Test 2 with delay 3"
+./myprogram 1 1 10 5 3
+
+echo "Test 4: 5p 5c 10 itm, 8 cache"
+./myprogram 5 5 10 8
+
+echo "Test 5: Test 4 but with del 1"
+./myprogram 5 5 10 8 4
+
+echo "\nTests Complete\n"
