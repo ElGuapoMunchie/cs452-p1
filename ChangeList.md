@@ -1,6 +1,13 @@
 # Changelist
 
 >10/17/2024
+I managed to pass all the tests. There's still a memory issue that's going on...
+I think it's being caused by setting the elements to NULL when I free them? Either
+that or I don't need to free items in the void* array.
+
+Much to consider.
+
+>10/17/2024
 AHHHHHHHHHH
 Maybe the Mutex isn't locking properly? How tf do I find the HBO?
 

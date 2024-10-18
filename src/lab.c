@@ -58,12 +58,12 @@ void queue_destroy(queue_t q)
         for (int i = 0; i < q->capacity; i++)
         {
             // Free items in the array
-            if (q->array[i] != NULL){
-                free(q->array[i]);
-            }
-            else {
+            // if (q->array[i] != NULL){
+            //     free(q->array[i]);
+            // }
+            // else {
                 q->array[i] = NULL; // Will nullifying pointer work? Idk
-            }
+            // }
         }
         // Nullify the pointer (good practice)
         q->array = NULL;
@@ -157,7 +157,7 @@ void *dequeue(queue_t q)
     retVal = q->array[tempInt];
 
     // // Nullify the pointer in the array
-    // q->array[tempInt] = NULL;
+    q->array[tempInt] = NULL;
     tempInt++;
 
     // Update head
