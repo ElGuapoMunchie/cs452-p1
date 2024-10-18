@@ -49,13 +49,21 @@ queue_t queue_init(int capacity)
 
 void queue_destroy(queue_t q)
 {
+    // Unlock mutex just in case...
+    pthread_mutex_unlock(&mutex);
+
     // Check if array is NULL. If !NULL, free memory inside
     if (q->array != NULL)
     {
-        for (int i = 0; i < q->currSize; i++)
+        for (int i = 0; i < q->capacity; i++)
         {
             // Free items in the array
-            free(q->array[i]);
+            if (q->array[i] != NULL){
+                free(q->array[i]);
+            }
+            else {
+                q->array[i] = NULL; // Will nullifying pointer work? Idk
+            }
         }
         // Nullify the pointer (good practice)
         q->array = NULL;
@@ -68,8 +76,16 @@ void enqueue(queue_t q, void *data)
     printf("Enqueue: %d\n", *(int *)data);
 
     // Lock mutex
-    pthread_mutex_lock(&mutex);
+    int result = pthread_mutex_lock(&mutex);
 
+    if (result == 0)
+    {
+        printf("lock successful\n");
+    }
+    else
+    {
+        printf("failure\n");
+    }
     // TODO: Check if mutex lock is actually working. Check for retval, maybe change parameter??
 
     // Check if data is NULL --> Fail
@@ -82,6 +98,7 @@ void enqueue(queue_t q, void *data)
     // Check if shutdown flagged --> Not allowed to add anything
     if (q->shutdown == true)
     {
+        pthread_mutex_unlock(&mutex);
         return;
     }
 
@@ -92,8 +109,11 @@ void enqueue(queue_t q, void *data)
         pthread_cond_wait(&not_full, &mutex);
     }
 
-
-    // TODO: Check case for when your head reaches the size of the queue. 
+    // Check if head index is out of bounds.
+    if (q->head == q->capacity)
+    {
+        q->head = 0;
+    }
     q->array[q->head] = data; // Update pointer to referenced data
     q->head++;
     q->currSize++; // Incremement number of items in queue
@@ -108,6 +128,17 @@ void *dequeue(queue_t q)
     // Lock mutex
     pthread_mutex_lock(&mutex);
 
+    // Check if in shutdown and size is 0 -> Exit and return NULL
+    if (q->shutdown && (q->currSize == 0))
+    {
+        pthread_mutex_unlock(&mutex);
+        printf("Queue is being shutdown. Remaining Elements:\n");
+        for (int i = 0; i < q->capacity; i++)
+        {
+            printf("[%d]%d\n", i, *q->array[i]);
+        }
+        return NULL;
+    }
 
     // Wait till queue has an element in it
     while (q->currSize == 0)
@@ -115,9 +146,18 @@ void *dequeue(queue_t q)
         pthread_cond_wait(&not_empty, &mutex);
     }
 
+    // Check case for when your tail is outside bounds.
+    if (q->tail == q->capacity)
+    {
+        q->tail = 0;
+    }
+
     // Grab value at tail
     tempInt = q->tail;
     retVal = q->array[tempInt];
+
+    // // Nullify the pointer in the array
+    // q->array[tempInt] = NULL;
     tempInt++;
 
     // Update head
