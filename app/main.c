@@ -126,7 +126,7 @@ static void *consumer(void *args)
 static void usage(char *n)
 {
      fprintf(stderr, "Usage: %s [-c num consumer] [-p num producer] [-i num items] [-s queue size] <-d introduce delay>\n", n);
-     fprintf(stderr, "-d will introduce a random delay between consumer and producer");
+     fprintf(stderr, "-d will introduce a random delay between consumer and producer\n");
      exit(EXIT_FAILURE);
 }
 

@@ -1,5 +1,11 @@
 # Changelist
 
+>10/18/2024
+Good news first- `main.c` is running!
+
+The "not so good" news:
+- Running `main` has an intermittint locking error: `deq-lock` will engage and not give it up when `shutdown` gets flagged. 
+
 >10/17/2024
 I managed to pass all the tests. There's still a memory issue that's going on...
 I think it's being caused by setting the elements to NULL when I free them? Either

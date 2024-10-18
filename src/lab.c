@@ -62,11 +62,12 @@ void queue_destroy(queue_t q)
             //     free(q->array[i]);
             // }
             // else {
-                q->array[i] = NULL; // Will nullifying pointer work? Idk
+            q->array[i] = NULL; // Will nullifying pointer work? Idk
             // }
         }
-        // Nullify the pointer (good practice)
-        q->array = NULL;
+
+        // Free the array
+        free(q->array);
     }
     pthread_mutex_destroy(&mutex);
 }
@@ -80,11 +81,11 @@ void enqueue(queue_t q, void *data)
 
     if (result == 0)
     {
-        printf("lock successful\n");
+        printf("en-lock successful\n");
     }
     else
     {
-        printf("failure\n");
+        printf("en-lock failure\n");
     }
     // TODO: Check if mutex lock is actually working. Check for retval, maybe change parameter??
 
@@ -126,17 +127,24 @@ void enqueue(queue_t q, void *data)
 void *dequeue(queue_t q)
 {
     // Lock mutex
-    pthread_mutex_lock(&mutex);
+    int result = pthread_mutex_lock(&mutex);
+    if (result == 0)
+    {
+        printf("deq-lock successful\n");
+    }
+    else
+    {
+        printf("deq-lock failure\n");
+    }
 
     // Check if in shutdown and size is 0 -> Exit and return NULL
     if (q->shutdown && (q->currSize == 0))
     {
         pthread_mutex_unlock(&mutex);
+
+        // TODO: Remove helper code here
         printf("Queue is being shutdown. Remaining Elements:\n");
-        for (int i = 0; i < q->capacity; i++)
-        {
-            printf("[%d]%d\n", i, *q->array[i]);
-        }
+        print_queue(q);
         return NULL;
     }
 
@@ -203,7 +211,17 @@ void print_queue(queue_t q)
     printf("Printing queue contents:\nCapacity:%d\nCurrSize:%d\n", q->capacity, q->currSize);
     for (int i = 0; i < q->currSize; i++)
     {
-        printf("[%d]", q->tail);
-        printf(" %d\n", *q->array[q->tail]); // TODO: Figure out how to dereference object
+        // Print location in queue
+        printf("[%d]", i);
+        if (q->array[i] != NULL)
+        {
+            // Print item, if exists
+            printf(" %d\n", *q->array[i]);
+        }
+        else
+        {
+            // Print null if doesn't exist
+            printf(" NULL\n");
+        }
     }
 }
