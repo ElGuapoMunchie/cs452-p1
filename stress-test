@@ -1,0 +1,43 @@
+#!/bin/bash
+# Author: Mark Muench
+# Date: 10/18/2024
+# Version: 1.0
+# Description:  Looping stress tester for BoundedBuffer project (p2)
+# Usage: ./stress-test
+
+# Start of tester: 
+echo "=== Looping Iterations (stress test) ==="
+
+# File you want to check
+FILE="myprogram"
+
+# Check if the file exists
+if [ -f "$FILE" ]; then
+    echo "$FILE exists."
+else
+    echo "$FILE does not exist. Compiling the program..."
+    make clean
+    make
+fi
+
+# Setup output file for tester
+OUTPUT_FILE="test_output.txt"
+echo "Test results:" > "$OUTPUT_FILE"
+echo "----------------------------------------" >> "$OUTPUT_FILE"
+
+
+for i in {1..20}; do
+    for s in {1..20}; do
+        for p in {1..8}; do
+            for c in {1..8}; do
+
+                echo "Testing program with p=$p, c=$c, s=$s, i=$i" >> "$OUTPUT_FILE"
+                ./myprogram -c "$c" -p "$p" -s "$s" -i "$i" >> "$OUTPUT_FILE" 2>&1
+
+                echo "----------------------------------------" >> "$OUTPUT_FILE"
+            done
+        done
+    done
+done
+
+echo -e "\nTests Complete\n"

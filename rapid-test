@@ -33,19 +33,19 @@ echo "Test 1: Default myprog"
 echo "Test 2: 1p, 1c, 10 itm, 5 cache"
 ./myprogram -p 1 -c 1 -i 10 -s 5 
 
-# echo "Test 3: Test 2 with delay 3"
-# ./myprogram -p 1 -c 1 -i 10 -s 5 -d 3
+echo "Test 3: Test 2 with delay 3"
+./myprogram -p 1 -c 1 -i 10 -s 5 -d 3
 
 
-# echo "Test 4: 5p 5c 10 itm, 8 cache"
-# ./myprogram -p 5 -c 5 -i 10 -s 8 
+echo "Test 4: 5p 5c 10 itm, 8 cache"
+./myprogram -p 5 -c 5 -i 10 -s 8 
 
 
-# echo "Test 5: Test 4 but with del 1"
-# ./myprogram -p 5 -c 5 -i 10 -s 8 -d 1
+echo "Test 5: Test 4 but with del 1"
+./myprogram -p 5 -c 5 -i 10 -s 8 -d 1
 
-# echo "=== EDGE CASES: ==="
-# ./myprogram -p 1 -c 1 -i 100 -s 1
-# ./myprogram -p 50 -c 1 -i 10 -s 5
+echo "=== EDGE CASES: ==="
+./myprogram -p 1 -c 1 -i 100 -s 1
+./myprogram -p 50 -c 1 -i 10 -s 5
 
-echo "\nTests Complete\n"
+echo "\n\n"

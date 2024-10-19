@@ -1,5 +1,16 @@
 # Changelist
 
+> 10/19/2024
+I've fixed all memory issues, all tests (whenever the address sanitizer bug doesn't show up)
+are passing without any issues.
+
+I made a second test file called "stress-test" that uses a bunch of for loops to test different
+combinations of variables that a user could imput. The output of each of these tests is placed
+into a file named `test_output.txt`.
+
+One issue with the tester exists- it can't handle when an address sanitizer error occurs, so 
+the program will just keep writing to the file for as long as it's running.
+
 >10/18/2024
 Good news first- `main.c` is running!
 

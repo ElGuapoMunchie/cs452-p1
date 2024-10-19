@@ -65,6 +65,11 @@ void queue_destroy(queue_t q)
         // Free the array
         free(q->array);
     }
+
+    // Free the malloc'd queue
+    free(q);
+
+    // Destroy the mutex
     pthread_mutex_destroy(&mutex);
 }
 
@@ -114,11 +119,11 @@ void *dequeue(queue_t q)
     // Lock mutex
     pthread_mutex_lock(&mutex);
 
-    // Somehow I have an off by 1 index error (hitting -1 for size ugh)
-    if (q->currSize <= 0)
-    {
-        print_queue(q);
-    }
+    // // Somehow I have an off by 1 index error (hitting -1 for size ugh)
+    // if (q->currSize <= 0)
+    // {
+    //     print_queue(q);
+    // }
 
     // Check if in shutdown and size is 0 -> Exit and return NULL
     if ((q->currSize == 0) && q->shutdown)
@@ -127,34 +132,18 @@ void *dequeue(queue_t q)
         return NULL;
     }
 
-    // Wait till queue has an element in it
+    // Wait till queue has an element in it. If shutdown flipped while wait, escape loop
     while (q->currSize == 0 && !q->shutdown)
     {
-        pthread_cond_wait(&not_empty, &mutex);
+        pthread_cond_wait(&not_empty, &mutex); 
     }
 
-
-    // // If shutdown is triggered after waking up, return NULL
-    // if (q->shutdown)
-    // {
-    //     pthread_mutex_unlock(&mutex);
-    //     // Check case for when your tail is outside bounds.
-    //     if (q->tail == q->capacity)
-    //     {
-    //         q->tail = 0;
-    //     }
-
-    //     // Grab value at tail
-    //     void *retVal = q->array[q->tail];
-    //     q->array[q->tail] = NULL;
-    //     q->tail++;
-    //     q->currSize--;
-
-    //     // Signal that the queue is not full anymore
-
-    //     // printf("Dequeue: %d\n", *(int *)retVal);
-    //     return retVal;
-    // }
+    // What if shutdown called when size is 0?
+    // Unlock mutex and return NULL
+    if (q->currSize == 0 && q->shutdown){
+        pthread_mutex_unlock(&mutex);
+        return NULL;
+    }
 
     // Check case for when your tail is outside bounds.
     if (q->tail == q->capacity)
@@ -189,7 +178,7 @@ void queue_shutdown(queue_t q)
 
 bool is_empty(queue_t q)
 {
-    print_queue(q);
+    // print_queue(q);
     if (q->currSize == 0)
     {
         return true;
