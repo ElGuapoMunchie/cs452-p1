@@ -212,6 +212,8 @@ int main(int argc, char *argv[])
      if (numproduced.num != numconsumed.num)
      {
           fprintf(stderr, "ERROR! produced != consumed\n");
+          fprintf(stderr, "%d produced, %d consumed\n", numproduced.num, numconsumed.num);
+          print_queue(pc_queue);
           abort();
      }
      fprintf(stderr, "Queue is empty:%s\n", is_empty(pc_queue) ? "true" : "false");
