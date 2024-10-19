@@ -59,7 +59,7 @@ void queue_destroy(queue_t q)
         for (int i = 0; i < q->capacity; i++)
         {
             // Set pointers in the queue to NULL
-            q->array[i] = NULL; 
+            q->array[i] = NULL;
         }
 
         // Free the array
@@ -70,7 +70,7 @@ void queue_destroy(queue_t q)
 
 void enqueue(queue_t q, void *data)
 {
-    printf("Enqueue: %d\n", *(int *)data);
+    // printf("Enqueue: %d\n", *(int *)data);
 
     // Lock mutex
     pthread_mutex_lock(&mutex);
@@ -114,6 +114,12 @@ void *dequeue(queue_t q)
     // Lock mutex
     pthread_mutex_lock(&mutex);
 
+    // Somehow I have an off by 1 index error (hitting -1 for size ugh)
+    if (q->currSize <= 0)
+    {
+        print_queue(q);
+    }
+
     // Check if in shutdown and size is 0 -> Exit and return NULL
     if ((q->currSize == 0) && q->shutdown)
     {
@@ -127,12 +133,28 @@ void *dequeue(queue_t q)
         pthread_cond_wait(&not_empty, &mutex);
     }
 
-    // If shutdown is triggered after waking up, return NULL
-    if (q->shutdown)
-    {
-        pthread_mutex_unlock(&mutex);
-        return NULL;
-    }
+
+    // // If shutdown is triggered after waking up, return NULL
+    // if (q->shutdown)
+    // {
+    //     pthread_mutex_unlock(&mutex);
+    //     // Check case for when your tail is outside bounds.
+    //     if (q->tail == q->capacity)
+    //     {
+    //         q->tail = 0;
+    //     }
+
+    //     // Grab value at tail
+    //     void *retVal = q->array[q->tail];
+    //     q->array[q->tail] = NULL;
+    //     q->tail++;
+    //     q->currSize--;
+
+    //     // Signal that the queue is not full anymore
+
+    //     // printf("Dequeue: %d\n", *(int *)retVal);
+    //     return retVal;
+    // }
 
     // Check case for when your tail is outside bounds.
     if (q->tail == q->capacity)
@@ -150,14 +172,14 @@ void *dequeue(queue_t q)
     pthread_cond_signal(&not_full);
     pthread_mutex_unlock(&mutex);
 
-    printf("Dequeue: %d\n", *(int *)retVal);
+    // printf("Dequeue: %d\n", *(int *)retVal);
     return retVal;
 }
 
 void queue_shutdown(queue_t q)
 {
-    printf("shutdown called\n");
-    printf("\tcurrSize: %d\n", q->currSize);
+    // printf("shutdown called\n");
+    // printf("\tcurrSize: %d\n", q->currSize);
 
     // Signal all threads to wake up
     q->shutdown = true;
@@ -165,9 +187,9 @@ void queue_shutdown(queue_t q)
     pthread_cond_broadcast(&not_full);
 }
 
-
 bool is_empty(queue_t q)
 {
+    print_queue(q);
     if (q->currSize == 0)
     {
         return true;
